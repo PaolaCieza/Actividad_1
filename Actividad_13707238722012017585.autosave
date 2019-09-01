@@ -9,8 +9,7 @@ class Boton:
         self.ancho = ancho
         self.alto = alto
         self.contenido = contenido
-        self.color = (255, 255, 255)
-        self.colorBorde = 0
+        self.color = 255
         self.tamanoTexto = 20
         self.colorTexto = 0
 
@@ -19,8 +18,8 @@ class Boton:
                 self.y < mouseY < self.y + self.alto)
 
     def dibujar(self):
-        stroke(self.colorBorde)
-        fill(self.color[0], self.color[1], self.color[2])
+        stroke(0)
+        fill(self.color)
         rect(self.x, self.y, self.ancho, self.alto)
         
         if (type(self.contenido) == str):
@@ -32,7 +31,7 @@ class Boton:
 
     def clickeado(self):
         colorOriginal = self.color
-        self.color = (0, 0, 0)
+        self.color = 0
         self.dibujar()
         self.color = colorOriginal
 
@@ -62,34 +61,47 @@ avatarY = 0
 tesoroX = (cantidadCuadros - 1)
 tesoroY = (cantidadCuadros - 1)
 
+# Coordenadas y tamaño del boton 4
+boton4X     = 610
+boton4Y     = 555
+boton4Ancho = 200
+boton4Alto  = 20
+
+# Coordenadas y tamaño de la barra
+barraX      = 690
+barraY      = 290
+barraAncho  = 20
+barraAlto   = 200
+
 # Botones de Métodos
-botonBresenham = Boton(620, 20, 170, 25, "Bresenham")
-botonMetodo2 = Boton(620, 60, 170, 25, "Metodo 2")
-botonMetodo3 = Boton(620, 100, 170, 25, "Metodo 3")
-botonMetodo4 = Boton(620, 140, 170, 25, "Metodo 4")
+botonBresenham = Boton(635, 20, 125, 25, "Bresenham")
+botonMetodo2 = Boton(635, 60, 125, 25, "Metodo 2")
+botonMetodo3 = Boton(635, 100, 125, 25, "Metodo 3")
+botonMetodo4 = Boton(635, 140, 125, 25, "Metodo 4")
+botonReinicio = Boton(635, 550, 125, 25, "Reiniciar")
 
-anchoPasos = 50
-
-pasosBresenham = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
-pasosMetodo2 = Boton(botonMetodo2.x + botonMetodo2.ancho, botonMetodo2.y, anchoPasos, botonMetodo2.alto, "0")
-pasosMetodo3 = Boton(botonMetodo3.x + botonMetodo3.ancho, botonMetodo3.y, anchoPasos, botonMetodo3.alto, "0")
-pasosMetodo4 = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
-
-botonReinicio = Boton(620, 550, 220, 25, "Reiniciar")
-
-barra = Boton(720, 290, 20, 200, "")
-barra.color = (0, 0, 0)
+# Respuestas
+rptm1x=610
+rptm1y=540
+rptm2x=660
+rptm2y=540
+rptm3x=710
+rptm3y=540
+rptm4x=760
+rptm4y=540
 
 # Coordenadas y tamaño del deslizador de la barra
-deslizador = Boton(barra.x - 5, barra.y + barra.alto, 30, 20, "")
-deslizador.color = (255, 0, 0)
-mouseSobreDeslizador       = False
+deslizadorX     = barraX - 5
+deslizadorY     = barraY + barraAlto
+deslizadorAncho = 30
+deslizadorAlto  = 20
+overLever       = False
 barraBloqueada  = False
 yOffset         = 0.0
 
 # Coordenadas y porcentaje de barra en texto
-porcentajeX = barra.x
-porcentajeY = barra.y - 5
+porcentajeX = barraX
+porcentajeY = barraY - 5
 porcentaje  = 0.0
 
 # Variables para la ruta a seguir por el avatar
@@ -100,7 +112,7 @@ iteradorBresenham = 0
 # Configuración de la interfaz y el juego
 def setup():
     # Tamaño de la ventana
-    size(860, 600)
+    size(900, 600)
     
     global jugando, colocandoAvatar, colocandoTesoro, rutaBresenham, rutaRecorrida, bresenhamActivado, yaJugo
     global imagenGrass, imagenAvatar, imagenTesoro, imagenArbol1, imagenArbol2, imagenArbol3, imagenArbol4, imagenArbol5
@@ -116,8 +128,8 @@ def setup():
     imagenArbol4    = loadImage("assets/tree4.png")
     imagenArbol5    = loadImage("assets/tree5.png")
 
-    botonAvatar = Boton(640, 180, 70, 70, imagenAvatar)
-    botonTesoro = Boton(750, 180, 70, 70, imagenTesoro)
+    botonAvatar = Boton(620, 180, 70, 70, imagenAvatar)
+    botonTesoro = Boton(700, 180, 70, 70, imagenTesoro)
 
     # Configuración inicial del juego
     jugando             = False
@@ -284,24 +296,26 @@ def perder():
 # Método que muestra la interfaz
 def dibujarInterfaz():
     background(255)
-    dibujarMapa()
     dibujarBotones()
-    mostrarPorcentajeBarra()
+    dibujarMapa()
+    fill(0)
+    bar()
+    fill(255,0,0)
+    lever()
+    pLever()
 
 def dibujarBotones():
     #Dibujar los cuadrados de Pasos
+    rect(rptm1x, rptm1y, 50, 40)
+    rect(rptm2x, rptm2y, 50, 40)
+    rect(rptm3x, rptm3y, 50, 40)
+    rect(rptm4x, rptm4y, 50, 40)
     botonAvatar.dibujar()
     botonTesoro.dibujar()
     botonBresenham.dibujar()
     botonMetodo2.dibujar()
     botonMetodo3.dibujar()
     botonMetodo4.dibujar()
-    pasosBresenham.dibujar()
-    pasosMetodo2.dibujar()
-    pasosMetodo3.dibujar()
-    pasosMetodo4.dibujar()
-    barra.dibujar()
-    dibujarDeslizador()
     botonReinicio.dibujar()
 
 # Dibuja el mapa
@@ -338,45 +352,62 @@ def dibujarMapa():
     image(imagenAvatar, avatarY * tamanoMapa, avatarX * tamanoMapa, tamanoMapa, tamanoMapa)
 
 
-def dibujarDeslizador():
-    global mouseSobreDeslizador
-    if deslizador.mouseEnBoton():
-        mouseSobreDeslizador = True
+def bar():
+    rect(barraX, barraY, barraAncho, barraAlto)
+
+
+def lever():
+    global overLever
+    if mouseX > deslizadorX and mouseY > deslizadorY and mouseX < deslizadorX+deslizadorAncho and mouseY < deslizadorY+deslizadorAlto:
+        overLever = True
         if not barraBloqueada:
-            deslizador.colorBorde = 120
+            stroke(120)
+            fill(255, 0, 0)
     else:
-        deslizador.colorBorde = 255
-        mouseSobreDeslizador = False
-    deslizador.dibujar()
+        stroke(255)
+        fill(255, 0, 0)
+        overLever = False
+    rect(deslizadorX, deslizadorY, deslizadorAncho, deslizadorAlto)
 
 
-def mostrarPorcentajeBarra():
+def pLever():
     text(str(porcentaje) + "%", porcentajeX-8, porcentajeY)
 
 
-def quitarAvatar():
+def b4():
+    global jugando, avatarX, avatarY, tesoroX, tesoroY
+    if jugando == False and yaJugo:
+        if avatarX == tesoroX and avatarY == tesoroY:
+            textSize(30)
+            text(rutaRecorrida.size(), rptm1x+7, rptm1y+35)
+        else:
+            textSize(50)
+            text("x", rptm1x+7, rptm1y+35)
+
+
+def clearmapaAvatar():
     global avatarX, avatarY
     avatarX = -1000/tamanoMapa
     avatarY = -1000/tamanoMapa
 
 
-def quitarTesoro():
+def clearmapaTreasure():
     global tesoroX, tesoroY
     tesoroX = -1000/tamanoMapa
     tesoroY = -1000/tamanoMapa
 
 
-def limpiarMapa():
+def clearmapa():
     for i in range(cantidadCuadros):
         for j in range(cantidadCuadros):
             mapa[i][j] = 0
 
 
-def colocarArboles():
+def putObstacles():
     global avatarX, avatarY, tesoroX, tesoroY
     v = [[(j, i) for i in range(0, cantidadCuadros)]
          for j in range(0, cantidadCuadros)]
-    limpiarMapa()
+    clearmapa()
     total = cantidadCuadros*cantidadCuadros
     objectsP = int(total*porcentaje)/100
     if avatarX == tesoroX and avatarY == tesoroY:
@@ -525,9 +556,8 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 
 
 def mousePressed():
-    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, barraBloqueada, yOffset, jugando, mapa, yaJugo
+    global colocandoTesoro, colocandoAvatar, overLever, barraBloqueada, yOffset, jugando, mapa, yaJugo
     global avatarX, avatarY, tesoroX, tesoroY
-
     if botonBresenham.mouseEnBoton():
         yaJugo = False
         jugando = True
@@ -545,22 +575,27 @@ def mousePressed():
     if botonAvatar.mouseEnBoton():
         yaJugo = False
         botonAvatar.clickeado()
-        quitarAvatar()
+        clearmapaAvatar()
         colocandoAvatar = True
 
     if botonTesoro.mouseEnBoton():
         yaJugo = False
         botonTesoro.clickeado()
-        quitarTesoro()
+        clearmapaTreasure()
         colocandoTesoro = True
 
     if botonReinicio.mouseEnBoton():
         botonReinicio.clickeado()
-        yaJugo = False
-        colocarArboles()
 
-    if mouseSobreDeslizador:
+    if mouseX > boton4X and mouseY > boton4Y and mouseX < boton4X+boton4Ancho and mouseY < boton4Y+boton4Alto:
+        yaJugo = False
+        fill(0)
+        b4()
+        putObstacles()
+
+    if overLever:
         barraBloqueada = True
+        fill(255, 0, 0)
     else:
         barraBloqueada = False
 
@@ -585,22 +620,22 @@ def mousePressed():
                 mapa[tesoroX][tesoroY] = 0
             print("TREASURE: "+str(tesoroX) + ' ' + str(tesoroY))
             colocandoTesoro = False
-    yOffset = mouseY - deslizador.y
+    yOffset = mouseY - deslizadorY
 
 
 def mouseDragged():
-    global porcentaje, yaJugo
+    global deslizadorY, porcentaje, yaJugo
     if barraBloqueada:
         yaJugo = False
-        deslizador.y = mouseY - yOffset
-        if deslizador.y < barra.y:
-            deslizador.y = barra.y
-        if deslizador.y > barra.y + barra.alto:
-            deslizador.y = barra.y + barra.alto
-        porcentaje = (float(barra.y+barra.alto-deslizador.y)
-                      * 100.0) / float(barra.alto)
+        deslizadorY = mouseY - yOffset
+        if deslizadorY < barraY:
+            deslizadorY = barraY
+        if deslizadorY > barraY + barraAlto:
+            deslizadorY = barraY + barraAlto
+        porcentaje = (float(barraY+barraAlto-deslizadorY)
+                      * 100.0) / float(barraAlto)
         print(porcentaje)
-        colocarArboles()
+        putObstacles()
 
 
 def mouseReleased():
