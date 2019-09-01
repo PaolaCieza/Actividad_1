@@ -1,29 +1,62 @@
+# Se importa el módulo que genera número aleatorios
 import random
 
-sz=10
-speed=50
-grid = [ [0]*sz for _ in range (sz) ]
-w=600/sz
+# Cantidad de cuadros - 1 por fila o columna
+cantidadCuadros = 10
 
-# -2 : Destino
-# -1 : Avatar
-#  0 : Grass
-# 1 - 5 : Tree/Bush
+# Tiempo de delay
+tiempoDelay = 50
 
+# Genera un array que contendrá los cuadros del mapa  (filas y columnas)
+mapa = [
+    # Crea un array que contiene cantidadCuadros (10) ceros: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    [0] * cantidadCuadros
+    # Repite lo anterior por cantidadCuadros (10) veces
+    for i in range(cantidadCuadros)
+]
 
-# (x,y) avatar
-avax=0
-avay=0
+# Se especifica el tamaño del mapa
+tamanoMapa = 600 / cantidadCuadros
 
-# (x,y) treasure
-trex=(sz-1)
-trey=(sz-1)
+# (x,y) Coordenadas iniciales del avatar
+avatarX = 0
+avatarY = 0
 
-# Button one(BUSCAR)
-b1x=650
-b1y=55
-b1w=100
-b1h=20
+# (x,y) Coordenadas iniciales del tesoro
+# El mapa es un array de 10 elementos por eso empieza a contar desde 0 y ubica al tesoro en las coordenadas (9, 9)
+tesoroX = (cantidadCuadros - 1)
+tesoroY = (cantidadCuadros - 1)
+
+# Coordenadas y tamaño del boton 1
+boton1X     = 650
+boton1Y     = 55
+boton1Ancho = 100
+boton1Alto  = 20
+
+# Coordenadas y tamaño del boton 2
+boton2X     = 620
+boton2Y     = 180
+boton2Ancho = 70
+boton2Alto  = 70
+
+# Coordenadas y tamaño del boton 3
+boton3X     = 700
+boton3Y     = 180
+boton3Ancho = 70
+boton3Alto  = 70
+
+# Coordenadas y tamaño del boton 4
+boton4X     = 610
+boton4Y     = 555
+boton4Ancho = 200
+boton4Alto  = 20
+
+# Coordenadas y tamaño de la barra
+barraX      = 690
+barraY      = 290
+barraAncho  = 20
+barraAlto   = 200
+
 
 # Botones de Métodos
 m1x=635
@@ -48,142 +81,209 @@ rptm3y=540
 rptm4x=760
 rptm4y=540
 
-# Button two
-b2x=620
-b2y=180
-b2w=70
-b2h=70
 
-# Button three
-b3x=700
-b3y=180
-b3w=70
-b3h=70
+# Coordenadas y tamaño del deslizador de la barra
+deslizadorX     = barraX - 5
+deslizadorY     = barraY + barraAlto
+deslizadorAncho = 30
+deslizadorAlto  = 20
+overLever       = False
+barraBloqueada  = False
+yOffset         = 0.0
 
-# Bar 
-barx =690
-bary=290
-barw=20
-barh=200
+# Coordenadas y porcentaje de barra en texto
+porcentajeX = barraX
+porcentajeY = barraY - 5
+porcentaje  = 0.0
 
-# Lever
-levx=barx-5
-levy= bary + barh
-levw=30
-levh=20
-overLever = False
-locked = False
-yOffset = 0.0 
 
-# Percent Lever
-perx=barx
-pery=bary-5
-percent=0.0
+# Variables para la ruta a seguir por el avatar
+global rutaBresenham, rutaRecorrida
+iteradorBresenham = 0
 
-# Button obstacles
-b4x=610
-b4y=555
-b4w=200
-b4h=20
 
-# List of (x,y)
-global bresenList, lastBox
-iterBresen=0
-
+# Configuración de la interfaz y el juego
 def setup():
-    size(820,600)
-    global play,puttingAvatar,puttingTreasure,bresenList, lastBox, doBresen, played
-    global grassImg,avatarImg,treasureImg,tree1,tree2,tree3,tree4,tree5
-    avatarImg = loadImage("assets/avatar.png")
-    grassImg = loadImage("assets/grass3.JPG")
-    treasureImg = loadImage("assets/treasure.PNG")
-    tree1 = loadImage("assets/tree1.png")
-    tree2 = loadImage("assets/tree2.png")
-    tree3 = loadImage("assets/tree3.png")
-    tree4 = loadImage("assets/tree4.png")
-    tree5 = loadImage("assets/tree5.png")
-    play=False
-    puttingAvatar = False
-    puttingTreasure = False
-    bresenList=[]
-    lastBox= Stack()
-    iterBresen=0
-    doBresen=True
-    played=False
-
-def draw():
-    if play:
-        findWay()
-        delay(speed)
-    interface()
-
-def findWay():
-    global avax,avay,lastBox,play,iterBresen, doBresen, grid, played
-    options=[]
-    if avax==trex and avay==trey:
-        endWin()
-        return
-    if doBresen:
-        bresenham(avax,avay,trex,trey)
-    print "actual: "+str(avax)+" "+str(avay)
-    if len(bresenList)>1 and grid[bresenList[iterBresen][0]][bresenList[iterBresen][1]]<5:
-        lastBox.push((avax,avay))
-        avax=bresenList[iterBresen][0]
-        avay=bresenList[iterBresen][1]
-        if(avax==trex and avay==trey):
-            endWin()
-            return
-        iterBresen+=1
-        doBresen=False
-        return
-    else: grid[avax][avay]+=1
-    doBresen=True
-    cont=0
-    for x in range(-1,2):
-        for y in range(-1,2):
-            if avax+x>=0 and avax+x<=sz-1 and avay+y>=0 and avay+y<=sz-1:
-                if lastBox.size()>0 and grid[avax+x][avay+y]<5 and (avax+x,avay+y)!=lastBox.peek() and not (x==0 and y==0) :
-                    cont+=1
-                    options.append((x,y))
-                elif lastBox.isEmpty() and grid[avax+x][avay+y]<5 and not (x==0 and y==0):
-                    cont+=1
-                    options.append((x,y))
-    if cont==0 and lastBox.size>0:
-        elem=lastBox.peek()
-        if grid[elem[0]][elem[1]]<5:
-            grid[avax][avay]+=1
-            avax=elem[0]
-            avay=elem[1]
-            lastBox.pop()
-            return
-        endLose()
-        return
-    elif cont==0 and lastBox.size==0:
-        endLose()
-        return
-    aux = random.choice(options)
-    lastBox.push((avax,avay))
-    avax+= aux[0]
-    avay+= aux[1]
-    if(avax==trex and avay==trey):
-            endWin()
-            return
+    # Tamaño de la ventana
+    size(820, 600)
     
-def endWin():
-    global played,doBresen,play
-    print "GANASTEEEEEE"
-    played=True
-    doBresen=True
-    play = False
+    global jugando, colocandoAvatar, colocandoTesoro, rutaBresenham, rutaRecorrida, bresenhamActivado, yaJugo
+    global imagenGrass, imagenAvatar, imagenTesoro, imagenArbol1, imagenArbol2, imagenArbol3, imagenArbol4, imagenArbol5
 
-def endLose():
-    global played,doBresen,play
-    play=False
-    doBresen=True
-    print "SE ACABOOOOO"
-    played=True
+    # Lectura de imagenes
+    imagenAvatar    = loadImage("assets/avatar.png")
+    imagenGrass     = loadImage("assets/grass3.JPG")
+    imagenTesoro    = loadImage("assets/treasure.PNG")
+    imagenArbol1    = loadImage("assets/tree1.png")
+    imagenArbol2    = loadImage("assets/tree2.png")
+    imagenArbol3    = loadImage("assets/tree3.png")
+    imagenArbol4    = loadImage("assets/tree4.png")
+    imagenArbol5    = loadImage("assets/tree5.png")
 
-def interface():
+    # Configuración inicial del juego
+    jugando             = False
+    colocandoAvatar     = False
+    colocandoTesoro     = False
+    rutaBresenham       = []
+    rutaRecorrida       = Stack()
+    iteradorBresenham   = 0
+    bresenhamActivado   = True
+    yaJugo              = False
+
+
+# Método que se ejecuta siempre
+def draw():
+    # Si el usuario está jugando entonces el programa encuentra la ruta
+    if jugando:
+        encontrarCamino()
+        delay(tiempoDelay)
+    
+    # Siempre se dibuja la interfaz
+    dibujarInterfaz()
+
+
+# Método que encuentra la ruta
+def encontrarCamino():
+    global avatarX, avatarY, rutaRecorrida, jugando, iteradorBresenham, bresenhamActivado, mapa, yaJugo
+    
+    # Array que guarda las alternativas para cambiar la posición inicial del avatar cuando se encuentra con un árbol
+    alternativas = []
+
+    # Se comprueba si el programa ganó
+    if avatarX == tesoroX and avatarY == tesoroY:
+        ganar()
+        return
+
+    # Si el método de búsqueda está seleccionado entonces ejecuta el método de bresenham
+    if bresenhamActivado:
+        bresenham(avatarX, avatarY, tesoroX, tesoroY)
+    
+    # Imprime en consola la posición actual del avatar
+    print("Avatar en: (" + str(avatarX) + "," + str(avatarY) + ")")
+
+    # Comprueba si la ruta tiene al menos una posición y si en la posición del avatar existe un árbol
+    if len(rutaBresenham) > 1 and mapa[rutaBresenham[iteradorBresenham][0]][rutaBresenham[iteradorBresenham][1]] < 5:
+        # Se guarda el recorrido del avatar
+        rutaRecorrida.insertar( (avatarX, avatarY) )
+
+        # Se cambia la posición del avatar a la siguiente posición de la ruta establecida
+        avatarX = rutaBresenham[iteradorBresenham][0]
+        avatarY = rutaBresenham[iteradorBresenham][1]
+
+        # Se comprueba si el avatar llegó a su destino
+        if(avatarX == tesoroX and avatarY == tesoroY):
+            # Gana
+            ganar()
+            return
+        
+        # Si el avatar no ha llegado a su destino entonces se pasa a la siguiente posición de la ruta
+        iteradorBresenham = iteradorBresenham + 1
+
+        # Se cambia a False para que no establezca una nueva ruta mientras se recorra la ruta actual
+        bresenhamActivado = False
+        return
+    else:
+        # Si en la siguiente posición de la ruta existe un árbol entonces en la posición actual del mapa aumenta en 1 para que si vuelve a pasar y
+        # existe el árbol se cree un nuevo árbol al llegar a 5 pasadas
+        mapa[avatarX][avatarY] = mapa[avatarX][avatarY] + 1
+    
+    # Como encontró un árbol entonces tiene que establecer una nueva ruta
+    bresenhamActivado = True
+
+    contador = 0
+
+    # Se busca en los 8 posibles cambios de coordenadas
+
+    # Con este primer bucle ve si aumenta o disminuye la coordenada actual del avatar en 1 unidad en el eje x
+    # x toma los valores de [-1, 0, 1]
+    for x in range(-1, 2):
+        # Con este segundo bucle ve si aumenta o disminuye la coordenada actual del avatar en 1 unidad en el eje y
+        # y toma los valores de [-1, 0, 1]
+        for y in range(-1, 2):
+            # Se calcula el cambio de coordenadas
+            cambioCoordenadaX = avatarX + x
+            cambioCoordenadaY = avatarY + y
+            
+            # Se verifica si las opciones se encuentran dentro del mapa
+            if 0 <= cambioCoordenadaX <= cantidadCuadros - 1 and 0 <= cambioCoordenadaY <= cantidadCuadros - 1:
+                
+                # Comprueba si en el cambio de coordenadas no existe un árbol y si el cambio de coordenadas no coincide con las coordenadas actuales
+                if rutaRecorrida.cantidad() > 0 and mapa[cambioCoordenadaX][cambioCoordenadaY] < 5 and (cambioCoordenadaX, cambioCoordenadaY) != rutaRecorrida.ultimoElemento() and not (x == 0 and y == 0):
+                    contador = contador + 1
+
+                    # Añade el cambio de coordenada como una de las opciones a cambiar
+                    alternativas.append( (x, y) )
+                elif rutaRecorrida.estaVacia() and mapa[cambioCoordenadaX][cambioCoordenadaY] < 5 and not (x == 0 and y == 0):
+                    contador = contador + 1
+
+                    # Añade el cambio de coordenada como una de las opciones a cambiar
+                    alternativas.append( (x, y) )
+    
+    # Si no encontró opciones de cambio de coordenada y recorrió toda su ruta entonces pierde
+    if contador == 0 and rutaRecorrida.cantidad() > 0:
+        # Toma la última posición de la ruta
+        elem = rutaRecorrida.ultimoElemento()
+
+        # Compara si en la última posición no encontró un árbol
+        if mapa[elem[0]][elem[1]] < 5:
+            # Aumenta en 1 la aparición del árbol en la coordenada actual del avatar
+            mapa[avatarX][avatarY] = mapa[avatarX][avatarY] + 1
+            
+            # Mueve al avatar a la última posición de la ruta
+            avatarX = elem[0]
+            avatarY = elem[1]
+
+            # Elimina la última posición
+            rutaRecorrida.soltar()
+            return
+
+        # Pierde
+        perder()
+        return
+    
+    # Si no encontró opciones y no hay ruta entonces pierde
+    elif contador == 0 and rutaRecorrida.cantidad() == 0:
+        # Pierde
+        perder()
+        return
+    
+    # Si encuentra opciones entonces escoge la nueva posición de inicio del avatar de manera aleatoria
+    aux = random.choice(alternativas)
+
+    # Inserta a la ruta recorrida la posición del avatar
+    rutaRecorrida.insertar((avatarX, avatarY))
+
+    # Coloca al avatar en la nueva posición encontrada
+    avatarX = avatarX + aux[0]
+    avatarY = avatarY + aux[1]
+
+    # Comprueba si con la nueva posición ganó
+    if(avatarX == tesoroX and avatarY == tesoroY):
+        # Gana
+        ganar()
+        return
+
+
+# Método que se ejecuta cuando se gana
+def ganar():
+    global yaJugo, bresenhamActivado, jugando
+    print("GANASTE")
+    yaJugo              = True
+    bresenhamActivado   = True
+    jugando             = False
+
+
+# Método que se ejecuta cuando se pierde
+def perder():
+    global yaJugo, bresenhamActivado, jugando
+    print("PERDISTE")
+    jugando             = False
+    bresenhamActivado   = True
+    yaJugo              = True
+
+
+# Método que muestra la interfaz
+def dibujarInterfaz():
     background(255)
     fill(255)
     # b1()
@@ -199,37 +299,7 @@ def interface():
     pLever()
     fill(255)
     #b4()
-    update()
-
-def update():
-    global grid
-    x,y=0,0;
-    for row in grid:
-        for col in row:
-            image(grassImg,x,y,w,w)
-            #if (x/w==avax and y/w==avay) or (x/w==trex and y/w==trey): grid[x/w][y/w]=0
-            img = selectImg(col)
-            image(img,x,y,w,w)
-            x=x+w
-        y=y+w
-        x=0
-    image(treasureImg,trey*w,trex*w,w,w)
-    image(avatarImg,avay*w,avax*w,w,w)
-
-def b1():
-    stroke(0)
-    rect(m1x,m1y,mw,mh)
-    textSize(20);
-    # fill(0)
-    # text("Busca!", m1x+5, m1y+20);
-
-def b2():
-    rect(b2x,b2y,b2w,b2h)
-    image(avatarImg,b2x,b2y,b2w,b2h)
-    
-def b3():
-    rect(b3x,b3y,b3w,b3h)
-    image(treasureImg,b3x,b3y,b3w,b3h)
+    dibujarMapa()
 
 def dibujarBotones():
     stroke(0)
@@ -249,235 +319,385 @@ def dibujarBotones():
     text("Metodo 2", m2x+5, m2y+20)
     text("Metodo 3", m3x+5, m3y+20)
     text("Metodo 4", m4x+5, m4y+20)
+
+# Dibuja el mapa
+def dibujarMapa():
+    global mapa
+    # Las imagenes se colocan cada tamanoMapa (10) unidades en el eje X e Y con un ancho y alto de tamanoMapa (10) unidades
     
+    # Empieza en las coordenadas (0, 0)
+    x, y = 0, 0
     
+    # Recorre todo el mapa, celda por celda para colocar las imágenes
+    for fila in mapa:
+        for columna in fila:
+
+            # Siempre coloca grass en cada celda
+            image(imagenGrass, x, y, tamanoMapa, tamanoMapa)
+
+            # Verifica si en esa celda va grass o un árbol de cualquier nivel
+            image(seleccionarImagen(columna), x, y, tamanoMapa, tamanoMapa)
+
+            # Incrementa el valor de la coordenada X en tamanoMapa (10) unidades por cada columna
+            x = x + tamanoMapa
+
+        # Incremente el valor de la coordenada Y en tamanoMapa (10) unidades por cada fila
+        y = y + tamanoMapa
+
+        # Reinicia en 0 la coordenada X porque se cambia de fila
+        x = 0
     
+    # Colocando el tesoro en su ubicación
+    image(imagenTesoro, tesoroY * tamanoMapa, tesoroX * tamanoMapa, tamanoMapa, tamanoMapa)
+
+    # Colocando al avatar en su ubicación
+    image(imagenAvatar, avatarY * tamanoMapa, avatarX * tamanoMapa, tamanoMapa, tamanoMapa)
+
+
+def b1():
+    stroke(0)
+    rect(m1x, m1y, mw, mh)
+    textSize(20)
+    # fill(0)
+    # text("Busca!", boton1X+20, boton1Y+20-2)
+
+
+def metodo1():
+    stroke(0)
+    rect(650, 460, 100, 25)
+    fill(0)
+    textSize(20)
+    fill(0)
+    text("Metodo 1", 655, 480)
+
+
+def metodo2():
+    stroke(0)
+    rect(650, 500, 100, 25)
+    fill(0)
+    textSize(20)
+    fill(0)
+    text("Metodo 2", 655, 520)
+
+
+def metodo3():
+    stroke(0)
+    rect(650, 540, 100, 25)
+    fill(0)
+    textSize(20)
+    fill(0)
+    text("Metodo 3", 655, 560)
+
+
+def metodo4():
+    stroke(0)
+    rect(650, 580, 100, 25)
+    fill(0)
+    textSize(20)
+    fill(0)
+    text("Metodo 4", 655, 600)
+
+
+def b2():
+    rect(boton2X, boton2Y, boton2Ancho, boton2Alto)
+    image(imagenAvatar, boton2X, boton2Y, boton2Ancho, boton2Alto)
+
+
+def b3():
+    rect(boton3X, boton3Y, boton3Ancho, boton3Alto)
+    image(imagenTesoro, boton3X, boton3Y, boton3Ancho, boton3Alto)
+
+
 def bar():
-    rect(barx,bary,barw,barh)
+    rect(barraX, barraY, barraAncho, barraAlto)
+
 
 def lever():
     global overLever
-    if mouseX > levx and mouseY > levy and  mouseX < levx+levw and mouseY < levy+levh:
+    if mouseX > deslizadorX and mouseY > deslizadorY and mouseX < deslizadorX+deslizadorAncho and mouseY < deslizadorY+deslizadorAlto:
         overLever = True
-        if not locked:
+        if not barraBloqueada:
             stroke(120)
-            fill(255,0,0)
+            fill(255, 0, 0)
     else:
         stroke(255)
-        fill(255,0,0)
+        fill(255, 0, 0)
         overLever = False
-    rect(levx,levy,levw,levh)
+    rect(deslizadorX, deslizadorY, deslizadorAncho, deslizadorAlto)
+
 
 def pLever():
-    text(str(percent) + "%", perx-8, pery);
+    text(str(porcentaje) + "%", porcentajeX-8, porcentajeY)
+
 
 def b4():
-    global play,avax,avay,trex,trey
+    global jugando, avatarX, avatarY, tesoroX, tesoroY
     fill(255)
     noStroke()
-    rect(b4x,b4y,b4w,b4h)
+    rect(boton1X, boton1Y, boton4Ancho, boton4Alto)
     textSize(20)
     fill(0)
-    if play==False and played:
-        if avax==trex and avay==trey:
+    if jugando == False and yaJugo:
+        if avatarX == tesoroX and avatarY == tesoroY:
             textSize(30)
-            text(lastBox.size(), rptm1x+7, rptm1y+35)
+            text(rutaRecorrida.size(), rptm1x+7, rptm1y+35)
         else:
             textSize(50)
             text("x", rptm1x+7, rptm1y+35)
-            
 
-def clearGridAvatar():
-    global avax,avay
-    avax=-1000/w
-    avay=-1000/w
 
-def clearGridTreasure():
-    global trex,trey
-    trex=-1000/w
-    trey=-1000/w
+def clearmapaAvatar():
+    global avatarX, avatarY
+    avatarX = -1000/tamanoMapa
+    avatarY = -1000/tamanoMapa
 
-def clearGrid():
-    for i in range(sz):
-        for j in range(sz):
-            grid[i][j]=0
+
+def clearmapaTreasure():
+    global tesoroX, tesoroY
+    tesoroX = -1000/tamanoMapa
+    tesoroY = -1000/tamanoMapa
+
+
+def clearmapa():
+    for i in range(cantidadCuadros):
+        for j in range(cantidadCuadros):
+            mapa[i][j] = 0
+
 
 def putObstacles():
-    global avax,avay,trex,trey
-    v = [[(j,i) for i in range(0,sz)] for j in range(0,sz)]
-    clearGrid()
-    total=sz*sz
-    objectsP=int(total*percent)/100
-    if avax==trex and avay==trey:
-        avax=0
-        avay=0
-        trex=sz-1
-        trey=sz-1
-    if objectsP>total-2:
+    global avatarX, avatarY, tesoroX, tesoroY
+    v = [[(j, i) for i in range(0, cantidadCuadros)]
+         for j in range(0, cantidadCuadros)]
+    clearmapa()
+    total = cantidadCuadros*cantidadCuadros
+    objectsP = int(total*porcentaje)/100
+    if avatarX == tesoroX and avatarY == tesoroY:
+        avatarX = 0
+        avatarY = 0
+        tesoroX = cantidadCuadros-1
+        tesoroY = cantidadCuadros-1
+    if objectsP > total-2:
         objectsP = total-2
-    v[avax].remove((avax,avay))
-    v[trex].remove((trex,trey))
-    print objectsP
-    while objectsP>0:
-        aux=random.choice(v)
-        while len(aux)==0:
-            aux=random.choice(v)
-        pos=random.choice(aux)
-        if grid[pos[0]][pos[1]]!=5 and not(pos[0]==avax and pos[0]==trex) and not(pos[1]==avay and pos[1]==trey):
-            grid[pos[0]][pos[1]]=5
-            objectsP-=1
+    v[avatarX].remove((avatarX, avatarY))
+    v[tesoroX].remove((tesoroX, tesoroY))
+    print(objectsP)
+    while objectsP > 0:
+        aux = random.choice(v)
+        while len(aux) == 0:
+            aux = random.choice(v)
+        pos = random.choice(aux)
+        if mapa[pos[0]][pos[1]] != 5 and not(pos[0] == avatarX and pos[0] == tesoroX) and not(pos[1] == avatarY and pos[1] == tesoroY):
+            mapa[pos[0]][pos[1]] = 5
+            objectsP -= 1
             aux.remove(pos)
-        elif grid[pos[0]][pos[1]]!=5 and avax==trex and pos[0]==avax and pos[1]!=avay and pos[1]!=trey:
-            grid[pos[0]][pos[1]]=5
-            objectsP-=1
+        elif mapa[pos[0]][pos[1]] != 5 and avatarX == tesoroX and pos[0] == avatarX and pos[1] != avatarY and pos[1] != tesoroY:
+            mapa[pos[0]][pos[1]] = 5
+            objectsP -= 1
             aux.remove(pos)
-        elif grid[pos[0]][pos[1]]!=5 and avay==trey and pos[1]==avay and pos[0]!=avax and pos[0]!=trex:
-            grid[pos[0]][pos[1]]=5
-            objectsP-=1
+        elif mapa[pos[0]][pos[1]] != 5 and avatarY == tesoroY and pos[1] == avatarY and pos[0] != avatarX and pos[0] != tesoroX:
+            mapa[pos[0]][pos[1]] = 5
+            objectsP -= 1
             aux.remove(pos)
 
-def bresenham(x0, y0, x1, y1):
-    global bresenList,iterBresen
-    iterBresen=1
-    aux = []
-    bresenList = aux
-    dx = x1 - x0
-    dy = y1 - y0
 
-    xsign = 1 if dx > 0 else -1
-    ysign = 1 if dy > 0 else -1
+def dda():
+    pass
 
-    dx = abs(dx)
-    dy = abs(dy)
 
-    if dx > dy:
-        xx, xy, yx, yy = xsign, 0, 0, ysign
+def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
+    global rutaBresenham, iteradorBresenham
+    iteradorBresenham = 1
+    rutaBresenham = []
+
+    # Se calcula la distancia que hay entre coordenadas con sus respectivos ejes
+    distanciaX = coordenadaTesoroX - coordenadaAvatarX
+    distanciaY = coordenadaTesoroY - coordenadaAvatarY
+
+    # Se verifica si las distancias son negativas o positivas para comprobar en qué cuadrante se encuentra la ruta 
+    # a seguir y así encontrar el vector unitario que indica la dirección de la ruta a seguir
+
+    # Si la ruta se encuentra en el primer cuadrante entonces el vector unitario será (1, 1)
+    # Si la ruta se encuentra en el segundo cuadrante entonces el vector unitario será (-1, 1)
+    # Si la ruta se encuentra en el tercer cuadrante entonces el vector unitario será (-1, -1)
+    # Si la ruta se encuentra en el cuarto cuadrante entonces el vector unitario será (1, -1)
+
+    # Esto le indica cómo moverse en diagonal
+    movimientoInclinadoX = 1 if distanciaX >= 0 else -1
+    movimientoInclinadoY = 1 if distanciaY >= 0 else -1
+
+    # Se pasa todo al primer cuadrante solo para usar un solo bucle
+    distanciaX = abs(distanciaX)
+    distanciaY = abs(distanciaY)
+
+    # Comprueba qué distancia es mayor para así indicarle al avatar en qué eje se debe mover sí o sí en una 1 unidad
+    # mientras que para la distancia menor se moverá AVECES en 1 unidad en el eje respectivo
+
+    # Esto indica cómo moverse en línea recta
+    if distanciaX >= distanciaY:
+
+        # Eje X: (1, 0) o (-1, 0)
+        movimientoRectoEjeXX = movimientoInclinadoX
+        movimientoRectoEjeXY = 0
+
+        # Eje Y: (0, 1) o (0, -1)
+        movimientoRectoEjeYX = 0
+        movimientoRectoEjeYY = movimientoInclinadoY
     else:
-        dx, dy = dy, dx
-        xx, xy, yx, yy = 0, ysign, xsign, 0
+        # Intercambia las distancias con el fin de usar el mismo algoritmo para el otro caso
+        distanciaX, distanciaY = distanciaY, distanciaX
 
-    D = 2*dy - dx
+        # Eje Y: (0, 1) o (0, -1)
+        movimientoRectoEjeXX = 0
+        movimientoRectoEjeXY = movimientoInclinadoX
+
+        # Eje X: (1, 0) o (-1, 0)
+        movimientoRectoEjeYX = movimientoInclinadoY
+        movimientoRectoEjeYY = 0
+
+    # Nota: en el algoritmo original no se hace las vainas raras que se hacen aquí
+
+    # Constante que verifica en cada iteración del bucle si el avatar se movió en el eje menor en una unidad o no.
+    # Para saber de dónde sale el 2 * dy - dx revisar: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Derivation
+    constanteP = 2 * distanciaY - distanciaX
+
+    # Parte desde el "origen" (0, 0)
+    # x = 0
     y = 0
 
-    for x in range(dx + 1):
-        #yield x0 + x*xx + y*yx, y0 + x*xy + y*yy
-        bresenList.append((x0 + x*xx + y*yx, y0 + x*xy + y*yy))
-        print '(' + str(x0 + x*xx + y*yx) + ',' + str(y0 + x*xy + y*yy) + ')'
-        if D >= 0:
-            y += 1
-            D -= 2*dx
-        D += 2*dy
+    print("Ruta establecida:")
+
+    # Se realiza el bucle para buscar la ruta
+    # Desde X = 0 hasta X = distanciaX
+    for x in range(distanciaX + 1):
+
+        # Avanza de manera diagonal o recta según la constante P
+        coordenadaX = coordenadaAvatarX + x * movimientoRectoEjeXX + y * movimientoRectoEjeYX
+        coordenadaY = coordenadaAvatarY + x * movimientoRectoEjeXY + y * movimientoRectoEjeYY
+
+        # Inserta la coordenada siguiente en la lista rutaBresenham
+        rutaBresenham.append( ( coordenadaX, coordenadaY ) )
+
+        print("\tPosicion N " + str(x + 1) + ": (" + str(coordenadaX) + ", " + str(coordenadaY) + ")")
+
+        # Con esto verifica si el avatar se movió 1 unidad o no en el eje menor
+        # Pero como sí o sí se hacen los cálculos como si dx fuese mayor entonces se incrementa en Y aveces
+        if constanteP >= 0:
+            y = y + 1
+            # Este cálculo se hace por el algoritmo
+            constanteP = constanteP - 2 * distanciaX
+        # Este cálculo se hace por el algoritmo
+        constanteP = constanteP + 2 * distanciaY
 
 
 def mousePressed():
-    global puttingTreasure, puttingAvatar,overLever,locked, yOffset,play,grid,played
-    global avax,avay,trex,trey
-    #print mouseY/w, mouseX/w
-    # if mouseX > b1x and mouseY > b1y and  mouseX < b1x+b1w and mouseY < b1y+b1h:
-    #     played=False
-    #     play=True
-    #     fill(0)
-    #     b1()
-    if mouseX > m1x and mouseY > m1y and  mouseX < m1x+mw and mouseY < m1y+mh:
-        played=False
-        play=True
+    global colocandoTesoro, colocandoAvatar, overLever, barraBloqueada, yOffset, jugando, mapa, yaJugo
+    global avatarX, avatarY, tesoroX, tesoroY
+    if mouseX > m1x and mouseY > m1y and mouseX < m1x+mw and mouseY < m1y+mh:
+        yaJugo = False
+        jugando = True
         fill(0)
         b1()
-    if mouseX > b2x and mouseY > b2y and  mouseX < b2x+b2w and mouseY < b2y+b2h:
-        played=False
+    if mouseX > boton2X and mouseY > boton2Y and mouseX < boton2X+boton2Ancho and mouseY < boton2Y+boton2Alto:
+        yaJugo = False
         fill(0)
         b2()
-        clearGridAvatar()
-        puttingAvatar=True
-    if mouseX > b3x and mouseY > b3y and  mouseX < b3x+b3w and mouseY < b3y+b3h:
-        played=False
+        clearmapaAvatar()
+        colocandoAvatar = True
+    if mouseX > boton3X and mouseY > boton3Y and mouseX < boton3X+boton3Ancho and mouseY < boton3Y+boton3Alto:
+        yaJugo = False
         fill(0)
         b3()
-        clearGridTreasure()
-        puttingTreasure=True
-    if mouseX > b4x and mouseY > b4y and  mouseX < b4x+b4w and mouseY < b4y+b4h:
-        played=False
+        clearmapaTreasure()
+        colocandoTesoro = True
+    if mouseX > boton4X and mouseY > boton4Y and mouseX < boton4X+boton4Ancho and mouseY < boton4Y+boton4Alto:
+        yaJugo = False
         fill(0)
         b4()
         putObstacles()
-    
+
     if overLever:
-        locked = True
-        fill(255,0,0)
+        barraBloqueada = True
+        fill(255, 0, 0)
     else:
-        locked = False
-        
-    if (mouseX/w)<sz and (mouseY/w)<sz :
-        played=False
-        #noFill()
-        #grid[mouseY/w][mouseX/w] = grid[mouseY/w][mouseX/w] + 1
-        if grid[mouseY/w][mouseX/w] == 5:
-            grid[mouseY/w][mouseX/w] =0
+        barraBloqueada = False
+
+    if (mouseX/tamanoMapa) < cantidadCuadros and (mouseY/tamanoMapa) < cantidadCuadros:
+        yaJugo = False
+        if mapa[mouseY/tamanoMapa][mouseX/tamanoMapa] == 5:
+            mapa[mouseY/tamanoMapa][mouseX/tamanoMapa] = 0
         else:
-            grid[mouseY/w][mouseX/w] =5
-        
-        if puttingAvatar:
-            #grid[mouseY/w][mouseX/w] = -1
-            avax=mouseY/w
-            avay=mouseX/w
-            if(grid[avax][avay]>=0 and grid[avax][avay]<=5):
-                grid[avax][avay]=0
-            print "AVATAR: "+str(avax) + ' ' + str(avay)
-            puttingAvatar=False
-        elif puttingTreasure:
-            #grid[mouseY/w][mouseX/w] = -2
-            trex=mouseY/w
-            trey=mouseX/w
-            if(grid[trex][trey]>=0 and grid[trex][trey]<=5):
-                grid[trex][trey]=0
-            print "TREASURE: "+str(trex) + ' ' + str(trey)
-            puttingTreasure=False
-    yOffset = mouseY - levy
+            mapa[mouseY/tamanoMapa][mouseX/tamanoMapa] = 5
+
+        if colocandoAvatar:
+            avatarX = mouseY/tamanoMapa
+            avatarY = mouseX/tamanoMapa
+            if(mapa[avatarX][avatarY] >= 0 and mapa[avatarX][avatarY] <= 5):
+                mapa[avatarX][avatarY] = 0
+            print("AVATAR: "+str(avatarX) + ' ' + str(avatarY))
+            colocandoAvatar = False
+        elif colocandoTesoro:
+            tesoroX = mouseY/tamanoMapa
+            tesoroY = mouseX/tamanoMapa
+            if(mapa[tesoroX][tesoroY] >= 0 and mapa[tesoroX][tesoroY] <= 5):
+                mapa[tesoroX][tesoroY] = 0
+            print("TREASURE: "+str(tesoroX) + ' ' + str(tesoroY))
+            colocandoTesoro = False
+    yOffset = mouseY - deslizadorY
+
 
 def mouseDragged():
-    global levy,percent,played
-    if locked:
-        played=False
-        levy = mouseY - yOffset
-        if levy < bary:
-            levy = bary
-        if levy > bary + barh:
-            levy = bary + barh
-        percent = (float( bary+barh-levy )*100.0) /float(barh)
-        print percent
+    global deslizadorY, porcentaje, yaJugo
+    if barraBloqueada:
+        yaJugo = False
+        deslizadorY = mouseY - yOffset
+        if deslizadorY < barraY:
+            deslizadorY = barraY
+        if deslizadorY > barraY + barraAlto:
+            deslizadorY = barraY + barraAlto
+        porcentaje = (float(barraY+barraAlto-deslizadorY)
+                      * 100.0) / float(barraAlto)
+        print(porcentaje)
         putObstacles()
 
+
 def mouseReleased():
-    locked = False
-        
-    
-def selectImg(x):
+    barraBloqueada = False
+
+
+# Método que retorna la imagen del valor del árbol
+def seleccionarImagen(celda):
     return {
-        0: grassImg,
-        1: tree1,
-        2: tree2,
-        3: tree3,
-        4: tree4,
-        5: tree5
-    }.get(x, tree5)
+        0: imagenGrass,     # No existe árbol
+        1: imagenArbol1,    # Árbol nivel 1
+        2: imagenArbol2,    # Árbol nivel 2
+        3: imagenArbol3,    # Árbol nivel 3
+        4: imagenArbol4,    # Árbol nivel 4
+        5: imagenArbol5     # Árbol nivel 5
+    }.get(celda, imagenArbol5)  # Si el valor del parámetro es un número que no se encuentra en el intervalo [0 - 5] entonces retorno un árbol de nivel 5
 
+
+# Creación de la estructura de datos 'Pila'
 class Stack:
-     def __init__(self):
-         self.items = []
+    # Método constructor
+    def __init__(self):
+        self.lista = []
 
-     def isEmpty(self):
-         return self.items == []
+    # Devuelve True o False si está vacío o no respectivamente
+    def estaVacia(self):
+        return self.lista == []
 
-     def push(self, item):
-         self.items.append(item)
+    # Inserta un elemento a la lista en la última posición
+    def insertar(self, item):
+        self.lista.append(item)
 
-     def pop(self):
-         return self.items.pop()
+    # Devuelve y elimina el último elemento de la lista
+    def soltar(self):
+        return self.lista.pop()
 
-     def peek(self):
-         return self.items[len(self.items)-1]
+    # Devuelve el último elemento de la lista
+    def ultimoElemento(self):
+        return self.lista[len(self.lista)-1]
 
-     def size(self):
-         return len(self.items)
-    
-    
+    # Devuelve la cantidad de elementos de la lista
+    def cantidad(self):
+        return len(self.lista)
