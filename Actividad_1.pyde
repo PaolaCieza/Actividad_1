@@ -3,6 +3,7 @@ import random
 
 # Clase para los botones
 class Boton:
+    # Método constructor
     def __init__(self, x, y, ancho, alto, contenido):
         self.x = x
         self.y = y
@@ -14,10 +15,12 @@ class Boton:
         self.tamanoTexto = 20
         self.colorTexto = 0
 
+    # Verifica si el mouse se encuentra sobre el botón
     def mouseEnBoton(self):
         return (self.x < mouseX < self.x + self.ancho and
                 self.y < mouseY < self.y + self.alto)
 
+    # Dibuja el botón
     def dibujar(self):
         stroke(self.colorBorde)
         fill(self.color[0], self.color[1], self.color[2])
@@ -30,6 +33,7 @@ class Boton:
         else:
             image(self.contenido, self.x, self.y, self.ancho, self.alto)
 
+    # Cambia el color del botón cuando se clickea sobre él
     def clickeado(self):
         colorOriginal = self.color
         self.color = (0, 0, 0)
@@ -37,21 +41,21 @@ class Boton:
         self.color = colorOriginal
 
 # Cantidad de cuadros - 1 por fila o columna
-cantidadCuadros = 10
+cuadrosPorLado = 10
 
 # Tiempo de delay
 tiempoDelay = 50
 
 # Genera un array que contendrá los cuadros del mapa  (filas y columnas)
 mapa = [
-    # Crea un array que contiene cantidadCuadros (10) ceros: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    [0] * cantidadCuadros
-    # Repite lo anterior por cantidadCuadros (10) veces
-    for i in range(cantidadCuadros)
+    # Crea un array que contiene cuadrosPorLado (10) ceros: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    [0] * cuadrosPorLado
+    # Repite lo anterior por cuadrosPorLado (10) veces
+    for i in range(cuadrosPorLado)
 ]
 
 # Se especifica el tamaño del mapa
-tamanoMapa = 600 / cantidadCuadros
+tamanoMapa = 600 / cuadrosPorLado
 
 # (x,y) Coordenadas iniciales del avatar
 avatarX = 0
@@ -59,8 +63,8 @@ avatarY = 0
 
 # (x,y) Coordenadas iniciales del tesoro
 # El mapa es un array de 10 elementos por eso empieza a contar desde 0 y ubica al tesoro en las coordenadas (9, 9)
-tesoroX = (cantidadCuadros - 1)
-tesoroY = (cantidadCuadros - 1)
+tesoroX = (cuadrosPorLado - 1)
+tesoroY = (cuadrosPorLado - 1)
 
 # Botones de Métodos
 botonBresenham = Boton(620, 20, 170, 25, "Bresenham")
@@ -68,24 +72,26 @@ botonMetodo2 = Boton(620, 60, 170, 25, "Metodo 2")
 botonMetodo3 = Boton(620, 100, 170, 25, "Metodo 3")
 botonMetodo4 = Boton(620, 140, 170, 25, "Metodo 4")
 
+# Cantidad de Pasos
 anchoPasos = 50
+pasosBresenham  = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
+pasosMetodo2    = Boton(botonMetodo2.x + botonMetodo2.ancho, botonMetodo2.y, anchoPasos, botonMetodo2.alto, "0")
+pasosMetodo3    = Boton(botonMetodo3.x + botonMetodo3.ancho, botonMetodo3.y, anchoPasos, botonMetodo3.alto, "0")
+pasosMetodo4    = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
 
-pasosBresenham = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
-pasosMetodo2 = Boton(botonMetodo2.x + botonMetodo2.ancho, botonMetodo2.y, anchoPasos, botonMetodo2.alto, "0")
-pasosMetodo3 = Boton(botonMetodo3.x + botonMetodo3.ancho, botonMetodo3.y, anchoPasos, botonMetodo3.alto, "0")
-pasosMetodo4 = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
-
+# Botón de reinicio
 botonReinicio = Boton(620, 550, 220, 25, "Reiniciar")
 
-barra = Boton(720, 290, 20, 200, "")
+# Barra
+barra       = Boton(720, 290, 20, 200, "")
 barra.color = (0, 0, 0)
 
 # Coordenadas y tamaño del deslizador de la barra
-deslizador = Boton(barra.x - 5, barra.y + barra.alto, 30, 20, "")
-deslizador.color = (255, 0, 0)
-mouseSobreDeslizador       = False
-barraBloqueada  = False
-yOffset         = 0.0
+deslizador                  = Boton(barra.x - 5, barra.y + barra.alto, 30, 20, "")
+deslizador.color            = (255, 0, 0)
+mouseSobreDeslizador        = False
+deslizadorMoviendose        = False
+espacioFaltante                     = 0.0
 
 # Coordenadas y porcentaje de barra en texto
 porcentajeX = barra.x
@@ -116,6 +122,7 @@ def setup():
     imagenArbol4    = loadImage("assets/tree4.png")
     imagenArbol5    = loadImage("assets/tree5.png")
 
+    # Botón para colocar el avatar y el tesoro
     botonAvatar = Boton(640, 180, 70, 70, imagenAvatar)
     botonTesoro = Boton(750, 180, 70, 70, imagenTesoro)
 
@@ -139,6 +146,192 @@ def draw():
     
     # Siempre se dibuja la interfaz
     dibujarInterfaz()
+
+
+# Método que muestra la interfaz
+def dibujarInterfaz():
+    background(255)
+    dibujarMapa()
+    dibujarBotones()
+    mostrarPorcentajeBarra()
+
+
+# Método que dibuja los botones
+def dibujarBotones():
+    botonAvatar.dibujar()
+    botonTesoro.dibujar()
+
+    botonBresenham.dibujar()
+    botonMetodo2.dibujar()
+    botonMetodo3.dibujar()
+    botonMetodo4.dibujar()
+
+    #Dibujar los cuadrados de Pasos
+    pasosBresenham.dibujar()
+    pasosMetodo2.dibujar()
+    pasosMetodo3.dibujar()
+    pasosMetodo4.dibujar()
+
+    dibujarDeslizador()
+
+    botonReinicio.dibujar()
+
+# Dibuja el mapa
+def dibujarMapa():
+    global mapa
+    # Las imagenes se colocan cada tamanoMapa (10) unidades en el eje X e Y con un ancho y alto de tamanoMapa (10) unidades
+    
+    # Empieza en las coordenadas (0, 0)
+    x, y = 0, 0
+    
+    # Recorre todo el mapa, celda por celda para colocar las imágenes
+    for fila in mapa:
+        for columna in fila:
+
+            # Siempre coloca grass en cada celda
+            image(imagenGrass, x, y, tamanoMapa, tamanoMapa)
+
+            # Verifica si en esa celda va grass o un árbol de cualquier nivel
+            image(seleccionarImagen(columna), x, y, tamanoMapa, tamanoMapa)
+
+            # Incrementa el valor de la coordenada X en tamanoMapa (10) unidades por cada columna
+            x = x + tamanoMapa
+
+        # Incremente el valor de la coordenada Y en tamanoMapa (10) unidades por cada fila
+        y = y + tamanoMapa
+
+        # Reinicia en 0 la coordenada X porque se cambia de fila
+        x = 0
+    
+    # Colocando el tesoro en su ubicación
+    image(imagenTesoro, tesoroY * tamanoMapa, tesoroX * tamanoMapa, tamanoMapa, tamanoMapa)
+
+    # Colocando al avatar en su ubicación
+    image(imagenAvatar, avatarY * tamanoMapa, avatarX * tamanoMapa, tamanoMapa, tamanoMapa)
+
+
+# Método que dibuja el deslizador
+def dibujarDeslizador():
+    barra.dibujar()
+    global mouseSobreDeslizador
+
+    # Variable de control que guarda si el mouse está sobre el deslizador
+    mouseSobreDeslizador = deslizador.mouseEnBoton()
+
+    # Esto agrega un efecto de hover sobre el deslizador
+    if mouseSobreDeslizador:
+        deslizador.colorBorde = 120
+    else:
+        deslizador.colorBorde = 255
+
+    deslizador.dibujar()
+
+
+# Método que retorna la imagen del valor del árbol
+def seleccionarImagen(celda):
+    return {
+        0: imagenGrass,     # No existe árbol
+        1: imagenArbol1,    # Árbol nivel 1
+        2: imagenArbol2,    # Árbol nivel 2
+        3: imagenArbol3,    # Árbol nivel 3
+        4: imagenArbol4,    # Árbol nivel 4
+        5: imagenArbol5     # Árbol nivel 5
+    }.get(celda, imagenArbol5)  # Si el valor del parámetro es un número que no se encuentra en el intervalo [0 - 5] entonces retorno un árbol de nivel 5
+
+
+# Muestra el porcentaje de la barra en un texto
+def mostrarPorcentajeBarra():
+    text(str(porcentaje) + " %", porcentajeX - 20, porcentajeY)
+
+
+# Método que se ejecuta cuando se gana
+def ganar():
+    global yaJugo, bresenhamActivado, jugando
+    print("GANASTE")
+    yaJugo              = True
+    jugando             = False
+    bresenhamActivado   = True
+
+
+# Método que se ejecuta cuando se pierde
+def perder():
+    global yaJugo, bresenhamActivado, jugando
+    print("PERDISTE")
+    yaJugo              = True
+    jugando             = False
+    bresenhamActivado   = True
+
+
+# Método que quita el avatar del mapa
+def quitarAvatar():
+    global avatarX, avatarY
+    avatarX = -1000/tamanoMapa
+    avatarY = -1000/tamanoMapa
+
+
+# Método que quita el tesoro del mapa
+def quitarTesoro():
+    global tesoroX, tesoroY
+    tesoroX = -1000/tamanoMapa
+    tesoroY = -1000/tamanoMapa
+
+
+# Método que limpia el mapa de árboles
+def limpiarMapa():
+    for i in range(cuadrosPorLado):
+        for j in range(cuadrosPorLado):
+            mapa[i][j] = 0
+
+
+# Método que coloca los árboles cuando el deslizador es movido
+def colocarArboles():
+    global avatarX, avatarY, tesoroX, tesoroY
+    
+    # Realiza un mapeo de las coordenadas del mapa
+    coordenadas = [ [ (j, i) for i in range(cuadrosPorLado) ] for j in range(cuadrosPorLado) ]
+
+    limpiarMapa()
+
+    totalCuadros = cuadrosPorLado * cuadrosPorLado
+
+    # Calcula la cantidad de árboles a colocar
+    cantidadArboles = int(totalCuadros * porcentaje) / 100
+
+    # Si el avatar ganó entonces lo devuelve al inicio y el tesoro también
+    if avatarX == tesoroX and avatarY == tesoroY:
+        avatarX = 0
+        avatarY = 0
+        tesoroX = cuadrosPorLado - 1
+        tesoroY = cuadrosPorLado - 1
+
+    # Si los árboles tienen que ocupar todo el mapa entonces deja espacio para el avatar y el tesoro
+    if cantidadArboles > totalCuadros - 2:
+        cantidadArboles = totalCuadros - 2
+    
+    # Remueve de los posibles lugares de aparición de árboles las coordenadas del avatar y del tesoro
+    coordenadas[avatarX].remove((avatarX, avatarY))
+    coordenadas[tesoroX].remove((tesoroX, tesoroY))
+
+    # Realiza un bucle para colocar los árboles
+    while cantidadArboles > 0:
+        # Escoge una fila del mapa manera aleatoria
+        filaEscogida = random.choice(coordenadas)
+
+        # Si por azares del destino la fila está vacía entonces vuelve a escoger otra fila
+        while len(filaEscogida) == 0:
+            filaEscogida = random.choice(coordenadas)
+
+        # De la fila escogida se escoge una coordenada de manera aleatoria
+        coordenadaEscogida = random.choice(filaEscogida)
+
+        # Coloca el árbol en la posición escogida
+        mapa[coordenadaEscogida[0]][coordenadaEscogida[1]] = 5
+
+        # Como ya colocó ese árbol entonces disminuye la cantidad de árboles a colocar
+        cantidadArboles = cantidadArboles - 1
+
+        # Elimina de las opciones a escoger las coordenadas del árbol colocado
+        filaEscogida.remove(coordenadaEscogida)
 
 
 # Método que encuentra la ruta
@@ -204,7 +397,7 @@ def encontrarCamino():
             cambioCoordenadaY = avatarY + y
             
             # Se verifica si las opciones se encuentran dentro del mapa
-            if 0 <= cambioCoordenadaX <= cantidadCuadros - 1 and 0 <= cambioCoordenadaY <= cantidadCuadros - 1:
+            if 0 <= cambioCoordenadaX <= cuadrosPorLado - 1 and 0 <= cambioCoordenadaY <= cuadrosPorLado - 1:
                 
                 # Comprueba si en el cambio de coordenadas no existe un árbol y si el cambio de coordenadas no coincide con las coordenadas actuales
                 if rutaRecorrida.cantidad() > 0 and mapa[cambioCoordenadaX][cambioCoordenadaY] < 5 and (cambioCoordenadaX, cambioCoordenadaY) != rutaRecorrida.ultimoElemento() and not (x == 0 and y == 0):
@@ -247,165 +440,20 @@ def encontrarCamino():
         return
     
     # Si encuentra opciones entonces escoge la nueva posición de inicio del avatar de manera aleatoria
-    aux = random.choice(alternativas)
+    posicionEscogida = random.choice(alternativas)
 
     # Inserta a la ruta recorrida la posición del avatar
     rutaRecorrida.insertar((avatarX, avatarY))
 
     # Coloca al avatar en la nueva posición encontrada
-    avatarX = avatarX + aux[0]
-    avatarY = avatarY + aux[1]
+    avatarX = avatarX + posicionEscogida[0]
+    avatarY = avatarY + posicionEscogida[1]
 
     # Comprueba si con la nueva posición ganó
     if(avatarX == tesoroX and avatarY == tesoroY):
         # Gana
         ganar()
         return
-
-
-# Método que se ejecuta cuando se gana
-def ganar():
-    global yaJugo, bresenhamActivado, jugando
-    print("GANASTE")
-    yaJugo              = True
-    bresenhamActivado   = True
-    jugando             = False
-
-
-# Método que se ejecuta cuando se pierde
-def perder():
-    global yaJugo, bresenhamActivado, jugando
-    print("PERDISTE")
-    jugando             = False
-    bresenhamActivado   = True
-    yaJugo              = True
-
-
-# Método que muestra la interfaz
-def dibujarInterfaz():
-    background(255)
-    dibujarMapa()
-    dibujarBotones()
-    mostrarPorcentajeBarra()
-
-def dibujarBotones():
-    #Dibujar los cuadrados de Pasos
-    botonAvatar.dibujar()
-    botonTesoro.dibujar()
-    botonBresenham.dibujar()
-    botonMetodo2.dibujar()
-    botonMetodo3.dibujar()
-    botonMetodo4.dibujar()
-    pasosBresenham.dibujar()
-    pasosMetodo2.dibujar()
-    pasosMetodo3.dibujar()
-    pasosMetodo4.dibujar()
-    barra.dibujar()
-    dibujarDeslizador()
-    botonReinicio.dibujar()
-
-# Dibuja el mapa
-def dibujarMapa():
-    global mapa
-    # Las imagenes se colocan cada tamanoMapa (10) unidades en el eje X e Y con un ancho y alto de tamanoMapa (10) unidades
-    
-    # Empieza en las coordenadas (0, 0)
-    x, y = 0, 0
-    
-    # Recorre todo el mapa, celda por celda para colocar las imágenes
-    for fila in mapa:
-        for columna in fila:
-
-            # Siempre coloca grass en cada celda
-            image(imagenGrass, x, y, tamanoMapa, tamanoMapa)
-
-            # Verifica si en esa celda va grass o un árbol de cualquier nivel
-            image(seleccionarImagen(columna), x, y, tamanoMapa, tamanoMapa)
-
-            # Incrementa el valor de la coordenada X en tamanoMapa (10) unidades por cada columna
-            x = x + tamanoMapa
-
-        # Incremente el valor de la coordenada Y en tamanoMapa (10) unidades por cada fila
-        y = y + tamanoMapa
-
-        # Reinicia en 0 la coordenada X porque se cambia de fila
-        x = 0
-    
-    # Colocando el tesoro en su ubicación
-    image(imagenTesoro, tesoroY * tamanoMapa, tesoroX * tamanoMapa, tamanoMapa, tamanoMapa)
-
-    # Colocando al avatar en su ubicación
-    image(imagenAvatar, avatarY * tamanoMapa, avatarX * tamanoMapa, tamanoMapa, tamanoMapa)
-
-
-def dibujarDeslizador():
-    global mouseSobreDeslizador
-    if deslizador.mouseEnBoton():
-        mouseSobreDeslizador = True
-        if not barraBloqueada:
-            deslizador.colorBorde = 120
-    else:
-        deslizador.colorBorde = 255
-        mouseSobreDeslizador = False
-    deslizador.dibujar()
-
-
-def mostrarPorcentajeBarra():
-    text(str(porcentaje) + "%", porcentajeX-8, porcentajeY)
-
-
-def quitarAvatar():
-    global avatarX, avatarY
-    avatarX = -1000/tamanoMapa
-    avatarY = -1000/tamanoMapa
-
-
-def quitarTesoro():
-    global tesoroX, tesoroY
-    tesoroX = -1000/tamanoMapa
-    tesoroY = -1000/tamanoMapa
-
-
-def limpiarMapa():
-    for i in range(cantidadCuadros):
-        for j in range(cantidadCuadros):
-            mapa[i][j] = 0
-
-
-def colocarArboles():
-    global avatarX, avatarY, tesoroX, tesoroY
-    v = [[(j, i) for i in range(0, cantidadCuadros)]
-         for j in range(0, cantidadCuadros)]
-    limpiarMapa()
-    total = cantidadCuadros*cantidadCuadros
-    objectsP = int(total*porcentaje)/100
-    if avatarX == tesoroX and avatarY == tesoroY:
-        avatarX = 0
-        avatarY = 0
-        tesoroX = cantidadCuadros-1
-        tesoroY = cantidadCuadros-1
-    if objectsP > total-2:
-        objectsP = total-2
-    v[avatarX].remove((avatarX, avatarY))
-    v[tesoroX].remove((tesoroX, tesoroY))
-    print(objectsP)
-    while objectsP > 0:
-        aux = random.choice(v)
-        while len(aux) == 0:
-            aux = random.choice(v)
-        pos = random.choice(aux)
-        if mapa[pos[0]][pos[1]] != 5 and not(pos[0] == avatarX and pos[0] == tesoroX) and not(pos[1] == avatarY and pos[1] == tesoroY):
-            mapa[pos[0]][pos[1]] = 5
-            objectsP -= 1
-            aux.remove(pos)
-        elif mapa[pos[0]][pos[1]] != 5 and avatarX == tesoroX and pos[0] == avatarX and pos[1] != avatarY and pos[1] != tesoroY:
-            mapa[pos[0]][pos[1]] = 5
-            objectsP -= 1
-            aux.remove(pos)
-        elif mapa[pos[0]][pos[1]] != 5 and avatarY == tesoroY and pos[1] == avatarY and pos[0] != avatarX and pos[0] != tesoroX:
-            mapa[pos[0]][pos[1]] = 5
-            objectsP -= 1
-            aux.remove(pos)
 
 
 def dda():
@@ -524,9 +572,13 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
         constanteP = constanteP + 2 * distanciaY
 
 
+# Método que se ejecuta cuando el click izquierdo del mouse es presionado
 def mousePressed():
-    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, barraBloqueada, yOffset, jugando, mapa, yaJugo
+    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo
     global avatarX, avatarY, tesoroX, tesoroY
+
+    # Con estos ifs se comprueba si el mouse está sobre un botón
+    # Les da un efecto de 'botón presionado' y realizan sus respectivas acciones
 
     if botonBresenham.mouseEnBoton():
         yaJugo = False
@@ -559,64 +611,73 @@ def mousePressed():
         yaJugo = False
         colocarArboles()
 
-    if mouseSobreDeslizador:
-        barraBloqueada = True
-    else:
-        barraBloqueada = False
+    deslizadorMoviendose = mouseSobreDeslizador
 
-    if (mouseX/tamanoMapa) < cantidadCuadros and (mouseY/tamanoMapa) < cantidadCuadros:
+    # Cuando se hace click sobre el mapa hace cosas
+    if (mouseX/tamanoMapa) < cuadrosPorLado and (mouseY/tamanoMapa) < cuadrosPorLado:
         yaJugo = False
-        if mapa[mouseY/tamanoMapa][mouseX/tamanoMapa] == 5:
-            mapa[mouseY/tamanoMapa][mouseX/tamanoMapa] = 0
+
+        # Si hay un árbol en el lugar donde se clickeó entonces lo quita
+        if mapa[mouseY / tamanoMapa][mouseX / tamanoMapa] == 5:
+            mapa[mouseY / tamanoMapa][mouseX / tamanoMapa] = 0
+        # caso contrario...
         else:
-            mapa[mouseY/tamanoMapa][mouseX/tamanoMapa] = 5
+            mapa[mouseY / tamanoMapa][mouseX / tamanoMapa] = 5
 
+        # Si se presionó el botón para colocar al avatar entonces el lugar donde se clickeó en el mapa es donde se coloca
         if colocandoAvatar:
-            avatarX = mouseY/tamanoMapa
-            avatarY = mouseX/tamanoMapa
-            if(mapa[avatarX][avatarY] >= 0 and mapa[avatarX][avatarY] <= 5):
+            avatarX = mouseY / tamanoMapa
+            avatarY = mouseX / tamanoMapa
+
+            # Si existe un árbol entonces lo quita 
+            if (0 <= mapa[avatarX][avatarY] <= 5):
                 mapa[avatarX][avatarY] = 0
-            print("AVATAR: "+str(avatarX) + ' ' + str(avatarY))
+
+            print("Avatar colocado en: (" + str(avatarX) + ", " + str(avatarY) + ")")
             colocandoAvatar = False
+        
+        # lo mismo pero para el tesoro
         elif colocandoTesoro:
-            tesoroX = mouseY/tamanoMapa
-            tesoroY = mouseX/tamanoMapa
-            if(mapa[tesoroX][tesoroY] >= 0 and mapa[tesoroX][tesoroY] <= 5):
+            tesoroX = mouseY / tamanoMapa
+            tesoroY = mouseX / tamanoMapa
+            
+            # Si existe un árbol entonces lo quita 
+            if (0 <= mapa[tesoroX][tesoroY] <= 5):
                 mapa[tesoroX][tesoroY] = 0
-            print("TREASURE: "+str(tesoroX) + ' ' + str(tesoroY))
+
+            print("Tesoro colocado en: (" + str(tesoroX) + ", " + str(tesoroY) + ")")
             colocandoTesoro = False
-    yOffset = mouseY - deslizador.y
+
+    espacioFaltante = mouseY - deslizador.y
 
 
+# Método que se ejecuta cuando el click izquierdo del mouse se mantiene presionado
 def mouseDragged():
     global porcentaje, yaJugo
-    if barraBloqueada:
+
+    # Se comprueba si el deslizador se está moviendo
+    if deslizadorMoviendose:
+        # Aún no se está jugando
         yaJugo = False
-        deslizador.y = mouseY - yOffset
+
+        # Vainas para que el deslizador se mueva
+        deslizador.y = mouseY - espacioFaltante
+
+        # y que no se salga de la barra
         if deslizador.y < barra.y:
             deslizador.y = barra.y
+
         if deslizador.y > barra.y + barra.alto:
             deslizador.y = barra.y + barra.alto
-        porcentaje = (float(barra.y+barra.alto-deslizador.y)
-                      * 100.0) / float(barra.alto)
-        print(porcentaje)
+
+        # Se calcula el porcentaje que colocó el usuario
+        porcentaje = (float( barra.y + barra.alto - deslizador.y) * 100.0) / float(barra.alto)
+
         colocarArboles()
 
 
 def mouseReleased():
-    barraBloqueada = False
-
-
-# Método que retorna la imagen del valor del árbol
-def seleccionarImagen(celda):
-    return {
-        0: imagenGrass,     # No existe árbol
-        1: imagenArbol1,    # Árbol nivel 1
-        2: imagenArbol2,    # Árbol nivel 2
-        3: imagenArbol3,    # Árbol nivel 3
-        4: imagenArbol4,    # Árbol nivel 4
-        5: imagenArbol5     # Árbol nivel 5
-    }.get(celda, imagenArbol5)  # Si el valor del parámetro es un número que no se encuentra en el intervalo [0 - 5] entonces retorno un árbol de nivel 5
+    deslizadorMoviendose = False
 
 
 # Creación de la estructura de datos 'Pila'
