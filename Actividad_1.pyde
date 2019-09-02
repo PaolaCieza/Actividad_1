@@ -70,7 +70,7 @@ tesoroY = (cuadrosPorLado - 1)
 botonBresenham = Boton(620, 20, 170, 25, "Bresenham")
 botonMetodo2 = Boton(620, 60, 170, 25, "Metodo 2")
 botonMetodo3 = Boton(620, 100, 170, 25, "Metodo 3")
-botonMetodo4 = Boton(620, 140, 170, 25, "Metodo 4")
+botonMetodo4 = Boton(620, 140, 170, 25, "Laberinto")
 
 # Cantidad de Pasos
 anchoPasos = 50
@@ -108,7 +108,7 @@ def setup():
     # Tamaño de la ventana
     size(860, 600)
     
-    global jugando, colocandoAvatar, colocandoTesoro, rutaBresenham, rutaRecorrida, bresenhamActivado, yaJugo
+    global jugando, colocandoAvatar, colocandoTesoro, rutaBresenham, rutaRecorrida, bresenhamActivado, yaJugo, laberinto
     global imagenGrass, imagenAvatar, imagenTesoro, imagenArbol1, imagenArbol2, imagenArbol3, imagenArbol4, imagenArbol5
     global botonAvatar, botonTesoro
 
@@ -135,7 +135,7 @@ def setup():
     iteradorBresenham   = 0
     bresenhamActivado   = True
     yaJugo              = False
-
+    laberinto           = False
 
 # Método que se ejecuta siempre
 def draw():
@@ -143,6 +143,9 @@ def draw():
     if jugando:
         encontrarCamino()
         delay(tiempoDelay)
+    
+    if laberinto:
+        busquedaLaberinto()
     
     # Siempre se dibuja la interfaz
     dibujarInterfaz()
@@ -455,6 +458,59 @@ def encontrarCamino():
         ganar()
         return
 
+def busquedaLaberinto():
+    #SE BUSCARÁ EL CAMINO MAS CORTO ENUMERANDO CADA CASILLA DISPONIBLE DESDE EL TESORO HASTA EL AVATARY LUEGO SE RECORRERÁ EL CAMINO EN REVERSA
+    global mapeadoM2, tesoroX, tesoroY, avatarX, avatarY, laberinto, pasosm2
+    
+    #COMPROBAR SI YA GANÓ
+    if avatarX == tesoroX and avatarY == tesoroY:
+        ganar()
+        laberinto = False
+        return
+    
+    #SI NO HA GANADO SE INICIA EL ETIQUETADO
+    mapeadoM2 = [[0] * cuadrosPorLado
+    for i in range(cuadrosPorLado)]
+    #mapear arboles
+    for i in range(cuadrosPorLado):
+        for j in range(cuadrosPorLado):
+            if mapa[i][j] == 5:
+                mapeadoM2[i][j] = 'x'
+    
+    #Establecer tesoro(Inicio del Laberinto)
+    mapeadoM2[tesoroX][tesoroY] = 0
+    
+    #empezar a enumerar los caminos
+    numerar(tesoroX, tesoroY)
+    
+    partidaX = avatarX
+    partidaY = avatarY
+    print(mapeadoM2)
+    
+    while pasosm2 < mapeadoM2[partidaX][partidaY]:
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                if 0 <= avatarX+x <= cuadrosPorLado - 1 and 0 <= avatarY+y <= cuadrosPorLado - 1:
+                    if mapeadoM2[avatarX+x][avatarY+y] == mapeadoM2[avatarX][avatarY]-1:
+                        avatarX += x
+                        avatarY += y
+                        pasosm2 += 1
+    laberinto = False
+    if pasosm2 == 0:
+        perder()
+    else:
+        ganar()
+    print(pasosm2)
+
+def numerar(actualX, actualY):
+    global mapeadoM2, pasosm2, tesoroX, tesoroY
+    for x in range(-1, 2):
+        for y in range(-1, 2):
+            if 0 <= actualX+x <= cuadrosPorLado - 1 and 0 <= actualY+y <= cuadrosPorLado - 1:
+                if mapeadoM2[actualX+x][actualY+y] != 'x' and (actualX+x != tesoroX or actualY+y != tesoroY):
+                    if mapeadoM2[actualX+x][actualY+y]==0 or mapeadoM2[actualX+x][actualY+y] > mapeadoM2[actualX][actualY] + 1:
+                        mapeadoM2[actualX+x][actualY+y] = mapeadoM2[actualX][actualY] + 1
+                        numerar(actualX+x, actualY+y)
 
 def dda():
     rutita = []
@@ -574,7 +630,7 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 
 # Método que se ejecuta cuando el click izquierdo del mouse es presionado
 def mousePressed():
-    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo
+    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, laberinto, pasosm2
     global avatarX, avatarY, tesoroX, tesoroY
 
     # Con estos ifs se comprueba si el mouse está sobre un botón
@@ -592,6 +648,8 @@ def mousePressed():
         botonMetodo3.clickeado()
 
     if botonMetodo4.mouseEnBoton():
+        laberinto = True
+        pasosm2=0
         botonMetodo4.clickeado()
 
     if botonAvatar.mouseEnBoton():
