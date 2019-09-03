@@ -67,15 +67,15 @@ tesoroX = (cuadrosPorLado - 1)
 tesoroY = (cuadrosPorLado - 1)
 
 # Botones de Métodos
-botonBresenham = Boton(620, 20, 170, 25, "Bresenham")
-botonMetodo2 = Boton(620, 60, 170, 25, "Metodo 2")
-botonMetodo3 = Boton(620, 100, 170, 25, "Metodo 3")
-botonMetodo4 = Boton(620, 140, 170, 25, "Laberinto")
+botonBresenham  = Boton(620, 20, 170, 25, "Bresenham")
+botonDDA        = Boton(620, 60, 170, 25, "DDA")
+botonMetodo3    = Boton(620, 100, 170, 25, "Metodo 3")
+botonMetodo4    = Boton(620, 140, 170, 25, "Laberinto")
 
 # Cantidad de Pasos
 anchoPasos = 50
 pasosBresenham  = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
-pasosMetodo2    = Boton(botonMetodo2.x + botonMetodo2.ancho, botonMetodo2.y, anchoPasos, botonMetodo2.alto, "0")
+pasosMetodo2    = Boton(botonDDA.x + botonDDA.ancho, botonDDA.y, anchoPasos, botonDDA.alto, "0")
 pasosMetodo3    = Boton(botonMetodo3.x + botonMetodo3.ancho, botonMetodo3.y, anchoPasos, botonMetodo3.alto, "0")
 pasosMetodo4    = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
 
@@ -91,7 +91,7 @@ deslizador                  = Boton(barra.x - 5, barra.y + barra.alto, 30, 20, "
 deslizador.color            = (255, 0, 0)
 mouseSobreDeslizador        = False
 deslizadorMoviendose        = False
-espacioFaltante                     = 0.0
+espacioFaltante             = 0.0
 
 # Coordenadas y porcentaje de barra en texto
 porcentajeX = barra.x
@@ -99,8 +99,8 @@ porcentajeY = barra.y - 5
 porcentaje  = 0.0
 
 # Variables para la ruta a seguir por el avatar
-global rutaBresenham, rutaRecorrida
-iteradorBresenham = 0
+global rutaEncontrada, rutaRecorrida
+iteradorRuta = 0
 
 
 # Configuración de la interfaz y el juego
@@ -108,7 +108,7 @@ def setup():
     # Tamaño de la ventana
     size(860, 600)
     
-    global jugando, colocandoAvatar, colocandoTesoro, rutaBresenham, rutaRecorrida, bresenhamActivado, yaJugo, laberinto
+    global jugando, colocandoAvatar, colocandoTesoro, rutaEncontrada, rutaRecorrida, yaJugo, metodoBusqueda
     global imagenGrass, imagenAvatar, imagenTesoro, imagenArbol1, imagenArbol2, imagenArbol3, imagenArbol4, imagenArbol5
     global botonAvatar, botonTesoro
 
@@ -130,22 +130,18 @@ def setup():
     jugando             = False
     colocandoAvatar     = False
     colocandoTesoro     = False
-    rutaBresenham       = []
+    rutaEncontrada      = []
     rutaRecorrida       = Pila()
-    iteradorBresenham   = 0
-    bresenhamActivado   = True
+    iteradorRuta        = 0
+    metodoBusqueda      = "Ninguno"
     yaJugo              = False
-    laberinto           = False
 
 # Método que se ejecuta siempre
 def draw():
     # Si el usuario está jugando entonces el programa encuentra la ruta
     if jugando:
-        encontrarCamino()
+        recorrerCamino()
         delay(tiempoDelay)
-    
-    if laberinto:
-        busquedaLaberinto()
     
     # Siempre se dibuja la interfaz
     dibujarInterfaz()
@@ -165,11 +161,11 @@ def dibujarBotones():
     botonTesoro.dibujar()
 
     botonBresenham.dibujar()
-    botonMetodo2.dibujar()
+    botonDDA.dibujar()
     botonMetodo3.dibujar()
     botonMetodo4.dibujar()
 
-    #Dibujar los cuadrados de Pasos
+    # Dibujar los cuadrados de Pasos
     pasosBresenham.dibujar()
     pasosMetodo2.dibujar()
     pasosMetodo3.dibujar()
@@ -253,7 +249,7 @@ def ganar():
     print("GANASTE")
     yaJugo              = True
     jugando             = False
-    bresenhamActivado   = True
+    metodoBusqueda      = "Ninguno"
 
 
 # Método que se ejecuta cuando se pierde
@@ -262,7 +258,7 @@ def perder():
     print("PERDISTE")
     yaJugo              = True
     jugando             = False
-    bresenhamActivado   = True
+    metodoBusqueda      = "Ninguno"
 
 
 # Método que quita el avatar del mapa
@@ -338,8 +334,8 @@ def colocarArboles():
 
 
 # Método que encuentra la ruta
-def encontrarCamino():
-    global avatarX, avatarY, rutaRecorrida, jugando, iteradorBresenham, bresenhamActivado, mapa, yaJugo
+def recorrerCamino():
+    global avatarX, avatarY, rutaRecorrida, jugando, iteradorRuta, mapa, yaJugo, metodoBusqueda, rutaEncontrada
     
     # Array que guarda las alternativas para cambiar la posición inicial del avatar cuando se encuentra con un árbol
     alternativas = []
@@ -350,20 +346,24 @@ def encontrarCamino():
         return
 
     # Si el método de búsqueda está seleccionado entonces ejecuta el método de bresenham
-    if bresenhamActivado:
+    if metodoBusqueda == "Bresenham":
         bresenham(avatarX, avatarY, tesoroX, tesoroY)
-    
-    # Imprime en consola la posición actual del avatar
-    print("Avatar en: (" + str(avatarX) + "," + str(avatarY) + ")")
+    elif metodoBusqueda == "DDA":
+        dda(avatarX, avatarY, tesoroX, tesoroY)
+    elif metodoBusqueda == "Laberinto":
+        busquedaLaberinto()
 
     # Comprueba si la ruta tiene al menos una posición y si en la posición del avatar existe un árbol
-    if len(rutaBresenham) > 1 and mapa[rutaBresenham[iteradorBresenham][0]][rutaBresenham[iteradorBresenham][1]] < 5:
+    if len(rutaEncontrada) > 1 and mapa[rutaEncontrada[iteradorRuta][0]][rutaEncontrada[iteradorRuta][1]] < 5:
         # Se guarda el recorrido del avatar
         rutaRecorrida.insertar( (avatarX, avatarY) )
 
         # Se cambia la posición del avatar a la siguiente posición de la ruta establecida
-        avatarX = rutaBresenham[iteradorBresenham][0]
-        avatarY = rutaBresenham[iteradorBresenham][1]
+        avatarX = rutaEncontrada[iteradorRuta][0]
+        avatarY = rutaEncontrada[iteradorRuta][1]
+
+        # Imprime en consola la posición actual del avatar
+        print("Avatar en: (" + str(avatarX) + "," + str(avatarY) + ")")
 
         # Se comprueba si el avatar llegó a su destino
         if(avatarX == tesoroX and avatarY == tesoroY):
@@ -372,10 +372,16 @@ def encontrarCamino():
             return
         
         # Si el avatar no ha llegado a su destino entonces se pasa a la siguiente posición de la ruta
-        iteradorBresenham = iteradorBresenham + 1
+        iteradorRuta = iteradorRuta + 1
 
         # Se cambia a False para que no establezca una nueva ruta mientras se recorra la ruta actual
-        bresenhamActivado = False
+        if metodoBusqueda == "Bresenham":
+            metodoBusqueda = "b"
+        elif metodoBusqueda == "DDA":
+            metodoBusqueda = "d"
+        elif metodoBusqueda == "Laberinto":
+            metodoBusqueda = "l"
+
         return
     else:
         # Si en la siguiente posición de la ruta existe un árbol entonces en la posición actual del mapa aumenta en 1 para que si vuelve a pasar y
@@ -383,7 +389,12 @@ def encontrarCamino():
         mapa[avatarX][avatarY] = mapa[avatarX][avatarY] + 1
     
     # Como encontró un árbol entonces tiene que establecer una nueva ruta
-    bresenhamActivado = True
+    if metodoBusqueda == "b":
+        metodoBusqueda = "Bresenham"
+    elif metodoBusqueda == "d":
+        metodoBusqueda = "DDA"
+    elif metodoBusqueda == "l":
+        metodoBusqueda = "Laberinto"
 
     contador = 0
 
@@ -460,12 +471,11 @@ def encontrarCamino():
 
 def busquedaLaberinto():
     #SE BUSCARÁ EL CAMINO MAS CORTO ENUMERANDO CADA CASILLA DISPONIBLE DESDE EL TESORO HASTA EL AVATARY LUEGO SE RECORRERÁ EL CAMINO EN REVERSA
-    global mapeadoM2, tesoroX, tesoroY, avatarX, avatarY, laberinto, pasosm2
+    global mapeadoM2, tesoroX, tesoroY, avatarX, avatarY, pasosm2
     
     #COMPROBAR SI YA GANÓ
     if avatarX == tesoroX and avatarY == tesoroY:
         ganar()
-        laberinto = False
         return
     
     #SI NO HA GANADO SE INICIA EL ETIQUETADO
@@ -495,7 +505,6 @@ def busquedaLaberinto():
                         avatarX += x
                         avatarY += y
                         pasosm2 += 1
-    laberinto = False
     if pasosm2 == 0:
         perder()
     else:
@@ -512,41 +521,36 @@ def numerar(actualX, actualY):
                         mapeadoM2[actualX+x][actualY+y] = mapeadoM2[actualX][actualY] + 1
                         numerar(actualX+x, actualY+y)
 
-def dda():
-    rutita = []
-    dx = tesoro2X - avatar2X
-    dy = tesoro2Y - avatar2Y
+def dda(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
+    global rutaEncontrada, iteradorRuta
+    iteradorRuta = 1
+    rutaEncontrada = []
+    dx = coordenadaTesoroX - coordenadaAvatarX
+    dy = coordenadaTesoroY - coordenadaAvatarY
+
+    if abs(dx) >= abs(dy):
+        res = abs(dx)
+    else:
+        res = abs(dy)
     
-    if dx > dy:
-        pendiente = dy / dx
-        valorConstanteRecta = avatar2Y - pendiente* avatar2X
-        if dx<0 :
-            dx = -1
-        else:
-            dx = 1
-        while avatar2X != tesoro2X:
-            avatar2X += dx
-            avatar2Y = round(pendiente * avatar2X + valorConstanteRecta)
-            rutita.push( [avatar2X, avatar2Y] )
-    elif dy != 0 : 
-        pendiente = dx / dy
-        valorConstanteRecta = avatar2X - pendiente*avatar2Y
-        if dy<0:
-            dy =  -1
-        else:
-            dy =  1
-        while avatar2Y != tesoro2Y:
-            avatar2Y += dy
-            avatar2X = round(pendiente * avatar2Y + valorConstanteRecta)
-            rutita.push( [avatar2X, avatar2Y] )
-            
-    print(rutita)
+    ax = float(dx) / float(res)
+    ay = float(dy) / float(res)
+
+    i = 1
+    x = coordenadaAvatarX
+    y = coordenadaAvatarY
+    
+    while i <= res:
+        x = x + ax
+        y = y + ay
+        i = i + 1
+        rutaEncontrada.append( (int(round(x)), int(round(y))) )
 
 
 def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
-    global rutaBresenham, iteradorBresenham
-    iteradorBresenham = 1
-    rutaBresenham = []
+    global rutaEncontrada, iteradorRuta
+    iteradorRuta = 1
+    rutaEncontrada = []
 
     # Se calcula la distancia que hay entre coordenadas con sus respectivos ejes
     distanciaX = coordenadaTesoroX - coordenadaAvatarX
@@ -613,8 +617,8 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
         coordenadaX = coordenadaAvatarX + x * movimientoRectoEjeXX + y * movimientoRectoEjeYX
         coordenadaY = coordenadaAvatarY + x * movimientoRectoEjeXY + y * movimientoRectoEjeYY
 
-        # Inserta la coordenada siguiente en la lista rutaBresenham
-        rutaBresenham.append( ( coordenadaX, coordenadaY ) )
+        # Inserta la coordenada siguiente en la lista rutaEncontrada
+        rutaEncontrada.append( ( coordenadaX, coordenadaY ) )
 
         print("\tPosicion N " + str(x + 1) + ": (" + str(coordenadaX) + ", " + str(coordenadaY) + ")")
 
@@ -630,25 +634,31 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 
 # Método que se ejecuta cuando el click izquierdo del mouse es presionado
 def mousePressed():
-    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, laberinto, pasosm2
+    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, metodoBusqueda
     global avatarX, avatarY, tesoroX, tesoroY
 
     # Con estos ifs se comprueba si el mouse está sobre un botón
     # Les da un efecto de 'botón presionado' y realizan sus respectivas acciones
 
     if botonBresenham.mouseEnBoton():
-        yaJugo = False
-        jugando = True
+        yaJugo              = False
+        jugando             = True
+        metodoBusqueda      = "Bresenham"
         botonBresenham.clickeado()
 
-    if botonMetodo2.mouseEnBoton():
-        botonMetodo2.clickeado()
+    if botonDDA.mouseEnBoton():
+        yaJugo              = False
+        jugando             = True
+        metodoBusqueda      = "DDA"
+        botonDDA.clickeado()
 
     if botonMetodo3.mouseEnBoton():
         botonMetodo3.clickeado()
 
     if botonMetodo4.mouseEnBoton():
-        laberinto = True
+        # yaJugo = False
+        # jugando = True
+        # metodoBusqueda = "Laberinto"
         pasosm2=0
         botonMetodo4.clickeado()
 
