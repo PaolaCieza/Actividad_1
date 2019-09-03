@@ -673,11 +673,11 @@ def mousePressed():
         botonMetodo3.clickeado()
 
     if botonMetodo4.mouseEnBoton():
-        yaJugo          = False
-        jugando         = True
-        metodoBusqueda  = "Laberinto"
-        rutaRecorrida   = Pila()
-        pasosm2         = 0
+        yaJugo         = False
+        jugando        = True
+        metodoBusqueda = "Laberinto"
+        rutaRecorrida  = Pila()
+        pasosm2        = 0
         botonMetodo4.clickeado()
 
     if botonAvatar.mouseEnBoton():
