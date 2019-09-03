@@ -99,7 +99,7 @@ porcentajeY = barra.y - 5
 porcentaje  = 0.0
 
 # Variables para la ruta a seguir por el avatar
-global rutaEncontrada, rutaRecorrida
+global rutaEncontrada, rutaRecorrida, pasosm2
 iteradorRuta = 0
 
 
@@ -352,6 +352,7 @@ def recorrerCamino():
         dda(avatarX, avatarY, tesoroX, tesoroY)
     elif metodoBusqueda == "Laberinto":
         busquedaLaberinto()
+        return
 
     # Comprueba si la ruta tiene al menos una posición y si en la posición del avatar existe un árbol
     if len(rutaEncontrada) > 1 and mapa[rutaEncontrada[iteradorRuta][0]][rutaEncontrada[iteradorRuta][1]] < 5:
@@ -634,7 +635,7 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 
 # Método que se ejecuta cuando el click izquierdo del mouse es presionado
 def mousePressed():
-    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, metodoBusqueda
+    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, metodoBusqueda, pasosm2
     global avatarX, avatarY, tesoroX, tesoroY
 
     # Con estos ifs se comprueba si el mouse está sobre un botón
@@ -656,9 +657,9 @@ def mousePressed():
         botonMetodo3.clickeado()
 
     if botonMetodo4.mouseEnBoton():
-        # yaJugo = False
-        # jugando = True
-        # metodoBusqueda = "Laberinto"
+        yaJugo = False
+        jugando = True
+        metodoBusqueda = "Laberinto"
         pasosm2=0
         botonMetodo4.clickeado()
 
