@@ -523,7 +523,7 @@ def numerar(actualX, actualY):
 
 def dda(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
     global rutaEncontrada, iteradorRuta
-    iteradorRuta = 1
+    iteradorRuta = 0
     rutaEncontrada = []
     dx = coordenadaTesoroX - coordenadaAvatarX
     dy = coordenadaTesoroY - coordenadaAvatarY
