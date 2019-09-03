@@ -352,12 +352,11 @@ def recorrerCamino():
         dda(avatarX, avatarY, tesoroX, tesoroY)
     elif metodoBusqueda == "Laberinto":
         busquedaLaberinto()
-        return
 
     # Comprueba si la ruta tiene al menos una posición y si en la posición del avatar existe un árbol
     if len(rutaEncontrada) > 1 and mapa[rutaEncontrada[iteradorRuta][0]][rutaEncontrada[iteradorRuta][1]] < 5:
         # Se guarda el recorrido del avatar
-        rutaRecorrida.insertar( (avatarX, avatarY) )
+        rutaRecorrida.insertar((avatarX, avatarY))
 
         # Se cambia la posición del avatar a la siguiente posición de la ruta establecida
         avatarX = rutaEncontrada[iteradorRuta][0]
@@ -473,6 +472,9 @@ def recorrerCamino():
 def busquedaLaberinto():
     #SE BUSCARÁ EL CAMINO MAS CORTO ENUMERANDO CADA CASILLA DISPONIBLE DESDE EL TESORO HASTA EL AVATARY LUEGO SE RECORRERÁ EL CAMINO EN REVERSA
     global mapeadoM2, tesoroX, tesoroY, avatarX, avatarY, pasosm2
+    global rutaEncontrada, iteradorRuta
+    iteradorRuta = 0
+    rutaEncontrada = []
     
     #COMPROBAR SI YA GANÓ
     if avatarX == tesoroX and avatarY == tesoroY:
@@ -496,21 +498,22 @@ def busquedaLaberinto():
     
     partidaX = avatarX
     partidaY = avatarY
-    print(mapeadoM2)
     
+    coorx = avatarX
+    coory = avatarY
+        
     while pasosm2 < mapeadoM2[partidaX][partidaY]:
         for x in range(-1, 2):
             for y in range(-1, 2):
-                if 0 <= avatarX+x <= cuadrosPorLado - 1 and 0 <= avatarY+y <= cuadrosPorLado - 1:
-                    if mapeadoM2[avatarX+x][avatarY+y] == mapeadoM2[avatarX][avatarY]-1:
-                        avatarX += x
-                        avatarY += y
+                if 0 <= coorx+x <= cuadrosPorLado - 1 and 0 <= coory+y <= cuadrosPorLado - 1:
+                    if mapeadoM2[coorx+x][coory+y] == mapeadoM2[coorx][coory]-1:
+                        coorx += x
+                        coory += y
                         pasosm2 += 1
-    if pasosm2 == 0:
+                        rutaEncontrada.append((coorx, coory))
+                        
+    if mapeadoM2[partidaX][partidaY] == 0:
         perder()
-    else:
-        ganar()
-    print(pasosm2)
 
 def numerar(actualX, actualY):
     global mapeadoM2, pasosm2, tesoroX, tesoroY
