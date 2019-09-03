@@ -75,9 +75,9 @@ botonMetodo4    = Boton(620, 140, 170, 25, "Laberinto")
 # Cantidad de Pasos
 anchoPasos = 50
 pasosBresenham  = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
-pasosMetodo2    = Boton(botonDDA.x + botonDDA.ancho, botonDDA.y, anchoPasos, botonDDA.alto, "0")
+pasosDDA    = Boton(botonDDA.x + botonDDA.ancho, botonDDA.y, anchoPasos, botonDDA.alto, "0")
 pasosMetodo3    = Boton(botonMetodo3.x + botonMetodo3.ancho, botonMetodo3.y, anchoPasos, botonMetodo3.alto, "0")
-pasosMetodo4    = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
+pasosLaberinto    = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
 
 # Botón de reinicio
 botonReinicio = Boton(620, 550, 220, 25, "Reiniciar")
@@ -167,9 +167,9 @@ def dibujarBotones():
 
     # Dibujar los cuadrados de Pasos
     pasosBresenham.dibujar()
-    pasosMetodo2.dibujar()
+    pasosDDA.dibujar()
     pasosMetodo3.dibujar()
-    pasosMetodo4.dibujar()
+    pasosLaberinto.dibujar()
 
     dibujarDeslizador()
 
@@ -339,6 +339,16 @@ def recorrerCamino():
     
     # Array que guarda las alternativas para cambiar la posición inicial del avatar cuando se encuentra con un árbol
     alternativas = []
+
+    if metodoBusqueda == "Bresenham" or metodoBusqueda == "b":
+        pasosBresenham.contenido = str(rutaRecorrida.cantidad())
+        pasosBresenham.dibujar()
+    elif metodoBusqueda == "DDA" or metodoBusqueda == "d":
+        pasosDDA.contenido = str(rutaRecorrida.cantidad())
+        pasosDDA.dibujar()
+    elif metodoBusqueda == "Laberinto" or metodoBusqueda == "l":
+        pasosLaberinto.contenido = str(rutaRecorrida.cantidad())
+        pasosLaberinto.dibujar()
 
     # Se comprueba si el programa ganó
     if avatarX == tesoroX and avatarY == tesoroY:
@@ -640,30 +650,34 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 def mousePressed():
     global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, metodoBusqueda, pasosm2
     global avatarX, avatarY, tesoroX, tesoroY
+    global rutaRecorrida
 
     # Con estos ifs se comprueba si el mouse está sobre un botón
     # Les da un efecto de 'botón presionado' y realizan sus respectivas acciones
 
     if botonBresenham.mouseEnBoton():
-        yaJugo              = False
-        jugando             = True
-        metodoBusqueda      = "Bresenham"
+        yaJugo         = False
+        jugando        = True
+        metodoBusqueda = "Bresenham"
+        rutaRecorrida  = Pila()
         botonBresenham.clickeado()
 
     if botonDDA.mouseEnBoton():
-        yaJugo              = False
-        jugando             = True
-        metodoBusqueda      = "DDA"
+        yaJugo         = False
+        jugando        = True
+        metodoBusqueda = "DDA"
+        rutaRecorrida  = Pila()
         botonDDA.clickeado()
 
     if botonMetodo3.mouseEnBoton():
         botonMetodo3.clickeado()
 
     if botonMetodo4.mouseEnBoton():
-        yaJugo = False
-        jugando = True
-        metodoBusqueda = "Laberinto"
-        pasosm2=0
+        yaJugo          = False
+        jugando         = True
+        metodoBusqueda  = "Laberinto"
+        rutaRecorrida   = Pila()
+        pasosm2         = 0
         botonMetodo4.clickeado()
 
     if botonAvatar.mouseEnBoton():
