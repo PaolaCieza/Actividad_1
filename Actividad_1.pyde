@@ -108,7 +108,7 @@ def setup():
     # Tamaño de la ventana
     size(860, 600)
     
-    global jugando, colocandoAvatar, colocandoTesoro, rutaEncontrada, rutaRecorrida, bresenhamActivado, yaJugo, ddaActivado
+    global jugando, colocandoAvatar, colocandoTesoro, rutaEncontrada, rutaRecorrida, yaJugo, metodoBusqueda
     global imagenGrass, imagenAvatar, imagenTesoro, imagenArbol1, imagenArbol2, imagenArbol3, imagenArbol4, imagenArbol5
     global botonAvatar, botonTesoro
 
@@ -133,8 +133,7 @@ def setup():
     rutaEncontrada      = []
     rutaRecorrida       = Pila()
     iteradorRuta        = 0
-    bresenhamActivado   = False
-    ddaActivado         = False
+    metodoBusqueda      = "Ninguno"
     yaJugo              = False
 
 
@@ -251,8 +250,7 @@ def ganar():
     print("GANASTE")
     yaJugo              = True
     jugando             = False
-    bresenhamActivado   = False
-    ddaActivado         = False
+    metodoBusqueda      = "Ninguno"
 
 
 # Método que se ejecuta cuando se pierde
@@ -261,8 +259,7 @@ def perder():
     print("PERDISTE")
     yaJugo              = True
     jugando             = False
-    bresenhamActivado   = False
-    ddaActivado         = False
+    metodoBusqueda      = "Ninguno"
 
 
 # Método que quita el avatar del mapa
@@ -339,7 +336,7 @@ def colocarArboles():
 
 # Método que encuentra la ruta
 def recorrerCamino():
-    global avatarX, avatarY, rutaRecorrida, jugando, iteradorRuta, bresenhamActivado, ddaActivado, mapa, yaJugo
+    global avatarX, avatarY, rutaRecorrida, jugando, iteradorRuta, mapa, yaJugo, metodoBusqueda, rutaEncontrada
     
     # Array que guarda las alternativas para cambiar la posición inicial del avatar cuando se encuentra con un árbol
     alternativas = []
@@ -350,13 +347,11 @@ def recorrerCamino():
         return
 
     # Si el método de búsqueda está seleccionado entonces ejecuta el método de bresenham
-    if bresenhamActivado:
+    if metodoBusqueda == "Bresenham":
         bresenham(avatarX, avatarY, tesoroX, tesoroY)
-
-    if ddaActivado:
+    elif metodoBusqueda == "DDA":
         dda(avatarX, avatarY, tesoroX, tesoroY)
 
-    print(len(rutaEncontrada))
     # Comprueba si la ruta tiene al menos una posición y si en la posición del avatar existe un árbol
     if len(rutaEncontrada) > 1 and mapa[rutaEncontrada[iteradorRuta][0]][rutaEncontrada[iteradorRuta][1]] < 5:
         # Se guarda el recorrido del avatar
@@ -379,8 +374,11 @@ def recorrerCamino():
         iteradorRuta = iteradorRuta + 1
 
         # Se cambia a False para que no establezca una nueva ruta mientras se recorra la ruta actual
-        bresenhamActivado = False
-        ddaActivado = False
+        if metodoBusqueda == "Bresenham":
+            metodoBusqueda = "b"
+        elif metodoBusqueda == "DDA":
+            metodoBusqueda = "d"
+
         return
     else:
         # Si en la siguiente posición de la ruta existe un árbol entonces en la posición actual del mapa aumenta en 1 para que si vuelve a pasar y
@@ -388,7 +386,10 @@ def recorrerCamino():
         mapa[avatarX][avatarY] = mapa[avatarX][avatarY] + 1
     
     # Como encontró un árbol entonces tiene que establecer una nueva ruta
-    ddaActivado = True
+    if metodoBusqueda == "b":
+        metodoBusqueda = "Bresenham"
+    elif metodoBusqueda == "d":
+        metodoBusqueda = "DDA"
 
     contador = 0
 
@@ -470,31 +471,24 @@ def dda(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesor
     rutaEncontrada = []
     dx = coordenadaTesoroX - coordenadaAvatarX
     dy = coordenadaTesoroY - coordenadaAvatarY
+
+    if abs(dx) >= abs(dy):
+        res = abs(dx)
+    else:
+        res = abs(dy)
     
-    if dx > dy:
-        pendiente = dy / dx
-        valorConstanteRecta = coordenadaAvatarY - pendiente * coordenadaAvatarX
-        if dx < 0 :
-            dx = -1
-        else:
-            dx = 1
-        while coordenadaAvatarX != coordenadaTesoroX:
-            coordenadaAvatarX += dx
-            coordenadaAvatarY = int(round(pendiente * coordenadaAvatarX + valorConstanteRecta))
-            rutaEncontrada.append( [coordenadaAvatarX, coordenadaAvatarY] )
-    elif dy != 0 : 
-        pendiente = dx / dy
-        valorConstanteRecta = coordenadaAvatarX - pendiente*coordenadaAvatarY
-        if dy < 0:
-            dy = -1
-        else:
-            dy = 1
-        while coordenadaAvatarY != coordenadaTesoroY:
-            coordenadaAvatarY += dy
-            coordenadaAvatarX = int(round(pendiente * coordenadaAvatarY + valorConstanteRecta))
-            rutaEncontrada.append( [coordenadaAvatarX, coordenadaAvatarY] )
-            
-    print(rutaEncontrada)
+    ax = float(dx) / float(res)
+    ay = float(dy) / float(res)
+
+    i = 1
+    x = coordenadaAvatarX
+    y = coordenadaAvatarY
+    
+    while i <= res:
+        x = x + ax
+        y = y + ay
+        i = i + 1
+        rutaEncontrada.append( (int(round(x)), int(round(y))) )
 
 
 def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
@@ -584,24 +578,22 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 
 # Método que se ejecuta cuando el click izquierdo del mouse es presionado
 def mousePressed():
-    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo
+    global colocandoTesoro, colocandoAvatar, mouseSobreDeslizador, deslizadorMoviendose, espacioFaltante, jugando, mapa, yaJugo, metodoBusqueda
     global avatarX, avatarY, tesoroX, tesoroY
 
     # Con estos ifs se comprueba si el mouse está sobre un botón
     # Les da un efecto de 'botón presionado' y realizan sus respectivas acciones
 
     if botonBresenham.mouseEnBoton():
-        bresenham(avatarX, avatarY, tesoroX, tesoroY)
-        yaJugo = False
-        jugando = True
-        bresenhamActivado = True
+        yaJugo              = False
+        jugando             = True
+        metodoBusqueda      = "Bresenham"
         botonBresenham.clickeado()
 
     if botonDDA.mouseEnBoton():
-        dda(avatarX, avatarY, tesoroX, tesoroY)
-        yaJugo = False
-        jugando = True
-        ddaActivado = True
+        yaJugo              = False
+        jugando             = True
+        metodoBusqueda      = "DDA"
         botonDDA.clickeado()
 
     if botonMetodo3.mouseEnBoton():
