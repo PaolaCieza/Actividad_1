@@ -67,17 +67,17 @@ tesoroX = (cuadrosPorLado - 1)
 tesoroY = (cuadrosPorLado - 1)
 
 # Botones de Métodos
-botonBresenham  = Boton(620, 20, 170, 25, "Bresenham")
-botonDDA        = Boton(620, 60, 170, 25, "DDA")
-botonMetodo3    = Boton(620, 100, 170, 25, "Metodo 3")
-botonMetodo4    = Boton(620, 140, 170, 25, "Laberinto")
+botonBresenham      = Boton(620, 20, 170, 25, "Bresenham")
+botonDDA            = Boton(620, 60, 170, 25, "DDA")
+botonPuntoPendiente = Boton(620, 100, 170, 25, "Punto pendiente")
+botonMetodo4        = Boton(620, 140, 170, 25, "Laberinto")
 
 # Cantidad de Pasos
 anchoPasos = 50
-pasosBresenham  = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
-pasosDDA    = Boton(botonDDA.x + botonDDA.ancho, botonDDA.y, anchoPasos, botonDDA.alto, "0")
-pasosMetodo3    = Boton(botonMetodo3.x + botonMetodo3.ancho, botonMetodo3.y, anchoPasos, botonMetodo3.alto, "0")
-pasosLaberinto    = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
+pasosBresenham      = Boton(botonBresenham.x + botonBresenham.ancho, botonBresenham.y, anchoPasos, botonBresenham.alto, "0")
+pasosDDA            = Boton(botonDDA.x + botonDDA.ancho, botonDDA.y, anchoPasos, botonDDA.alto, "0")
+pasosPuntoPendiente = Boton(botonPuntoPendiente.x + botonPuntoPendiente.ancho, botonPuntoPendiente.y, anchoPasos, botonPuntoPendiente.alto, "0")
+pasosLaberinto      = Boton(botonMetodo4.x + botonMetodo4.ancho, botonMetodo4.y, anchoPasos, botonMetodo4.alto, "0")
 
 # Botón de reinicio
 botonReinicio = Boton(620, 550, 220, 25, "Reiniciar")
@@ -162,13 +162,13 @@ def dibujarBotones():
 
     botonBresenham.dibujar()
     botonDDA.dibujar()
-    botonMetodo3.dibujar()
+    botonPuntoPendiente.dibujar()
     botonMetodo4.dibujar()
 
     # Dibujar los cuadrados de Pasos
     pasosBresenham.dibujar()
     pasosDDA.dibujar()
-    pasosMetodo3.dibujar()
+    pasosPuntoPendiente.dibujar()
     pasosLaberinto.dibujar()
 
     dibujarDeslizador()
@@ -346,6 +346,9 @@ def recorrerCamino():
     elif metodoBusqueda == "DDA" or metodoBusqueda == "d":
         pasosDDA.contenido = str(rutaRecorrida.cantidad())
         pasosDDA.dibujar()
+    elif metodoBusqueda == "Punto pendiente" or metodoBusqueda == "p":
+        pasosPuntoPendiente.contenido = str(rutaRecorrida.cantidad())
+        pasosPuntoPendiente.dibujar()
     elif metodoBusqueda == "Laberinto" or metodoBusqueda == "l":
         pasosLaberinto.contenido = str(rutaRecorrida.cantidad())
         pasosLaberinto.dibujar()
@@ -360,6 +363,8 @@ def recorrerCamino():
         bresenham(avatarX, avatarY, tesoroX, tesoroY)
     elif metodoBusqueda == "DDA":
         dda(avatarX, avatarY, tesoroX, tesoroY)
+    elif metodoBusqueda == "Punto pendiente":
+        puntoPendiente(avatarX, avatarY, tesoroX, tesoroY)
     elif metodoBusqueda == "Laberinto":
         busquedaLaberinto()
 
@@ -389,6 +394,8 @@ def recorrerCamino():
             metodoBusqueda = "b"
         elif metodoBusqueda == "DDA":
             metodoBusqueda = "d"
+        elif metodoBusqueda == "Punto pendiente":
+            metodoBusqueda = "p"
         elif metodoBusqueda == "Laberinto":
             metodoBusqueda = "l"
 
@@ -403,6 +410,8 @@ def recorrerCamino():
         metodoBusqueda = "Bresenham"
     elif metodoBusqueda == "d":
         metodoBusqueda = "DDA"
+    elif metodoBusqueda == "p":
+        metodoBusqueda = "Punto pendiente"
     elif metodoBusqueda == "l":
         metodoBusqueda = "Laberinto"
 
@@ -561,6 +570,23 @@ def dda(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesor
         rutaEncontrada.append( (int(round(x)), int(round(y))) )
 
 
+def puntoPendiente(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
+    global rutaEncontrada, iteradorRuta
+    iteradorRuta = 1
+    rutaEncontrada = []
+
+    pendiente = float(coordenadaTesoroY - coordenadaAvatarY) / (coordenadaTesoroX - coordenadaAvatarX)
+    b = float(coordenadaAvatarY - pendiente * coordenadaAvatarX)
+
+    x = coordenadaAvatarX
+    y = coordenadaAvatarY
+
+    while x < (coordenadaTesoroX + 1):
+        rutaEncontrada.append( (x, int(round(y))) )
+        x = x + 1
+        y = pendiente * x + b
+
+
 def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
     global rutaEncontrada, iteradorRuta
     iteradorRuta = 1
@@ -621,8 +647,6 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
     # x = 0
     y = 0
 
-    print("Ruta establecida:")
-
     # Se realiza el bucle para buscar la ruta
     # Desde X = 0 hasta X = distanciaX
     for x in range(distanciaX + 1):
@@ -633,8 +657,6 @@ def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenad
 
         # Inserta la coordenada siguiente en la lista rutaEncontrada
         rutaEncontrada.append( ( coordenadaX, coordenadaY ) )
-
-        print("\tPosicion N " + str(x + 1) + ": (" + str(coordenadaX) + ", " + str(coordenadaY) + ")")
 
         # Con esto verifica si el avatar se movió 1 unidad o no en el eje menor
         # Pero como sí o sí se hacen los cálculos como si dx fuese mayor entonces se incrementa en Y aveces
@@ -669,8 +691,12 @@ def mousePressed():
         rutaRecorrida  = Pila()
         botonDDA.clickeado()
 
-    if botonMetodo3.mouseEnBoton():
-        botonMetodo3.clickeado()
+    if botonPuntoPendiente.mouseEnBoton():
+        yaJugo          = False
+        jugando         = True
+        metodoBusqueda  = "Punto pendiente"
+        rutaRecorrida   = Pila()
+        botonPuntoPendiente.clickeado()
 
     if botonMetodo4.mouseEnBoton():
         yaJugo         = False
