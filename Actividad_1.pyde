@@ -574,17 +574,38 @@ def puntoPendiente(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coor
     global rutaEncontrada, iteradorRuta
     iteradorRuta = 1
     rutaEncontrada = []
-
-    pendiente = float(coordenadaTesoroY - coordenadaAvatarY) / (coordenadaTesoroX - coordenadaAvatarX)
-    b = float(coordenadaAvatarY - pendiente * coordenadaAvatarX)
-
+    
     x = coordenadaAvatarX
     y = coordenadaAvatarY
-
-    while x < (coordenadaTesoroX + 1):
-        rutaEncontrada.append( (x, int(round(y))) )
+    
+    fin = coordenadaTesoroX
+    
+    if coordenadaTesoroX == coordenadaAvatarX :
+        x, y = coordenadaAvatarY, coordenadaAvatarX
+        fin = coordenadaTesoroY
+        pendiente = 0
+    else:
+        pendiente = float(coordenadaTesoroY - coordenadaAvatarY) / (coordenadaTesoroX - coordenadaAvatarX)
+        
+    b = float(coordenadaAvatarY - pendiente * coordenadaAvatarX)
+    
+    while x < (fin + 1):
+        if pendiente == 0:
+            rutaEncontrada.append( (int(round(y)), x) )
+        else:
+            rutaEncontrada.append( (x, int(round(y))) )
         x = x + 1
         y = pendiente * x + b
+        
+    while x > (fin - 1):
+        if pendiente == 0:
+            rutaEncontrada.append( (int(round(y)), x) )
+        else:
+            rutaEncontrada.append( (x, int(round(y))) )
+        x = x - 1
+        y = pendiente * x + b
+            
+    print(rutaEncontrada)
 
 
 def bresenham(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coordenadaTesoroY):
