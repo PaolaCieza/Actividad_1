@@ -591,7 +591,7 @@ def puntoPendiente(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coor
     
     while x < (fin + 1):
         if pendiente == 0:
-            rutaEncontrada.append( (int(round(y)), x) )
+            rutaEncontrada.append( (coordenadaTesoroX, x) )
         else:
             rutaEncontrada.append( (x, int(round(y))) )
         x = x + 1
@@ -599,7 +599,7 @@ def puntoPendiente(coordenadaAvatarX, coordenadaAvatarY, coordenadaTesoroX, coor
         
     while x > (fin - 1):
         if pendiente == 0:
-            rutaEncontrada.append( (int(round(y)), x) )
+            rutaEncontrada.append( (coordenadaTesoroX, x) )
         else:
             rutaEncontrada.append( (x, int(round(y))) )
         x = x - 1
