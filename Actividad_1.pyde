@@ -281,13 +281,16 @@ def limpiarMapa():
         for j in range(cuadrosPorLado):
             mapa[i][j] = 0
 
+ubicacionesArboles = []
+
 
 # Método que coloca los árboles cuando el deslizador es movido
 def colocarArboles():
-    global avatarX, avatarY, tesoroX, tesoroY
+    global avatarX, avatarY, tesoroX, tesoroY, ubicacionesArboles
     
     # Realiza un mapeo de las coordenadas del mapa
     coordenadas = [ [ (j, i) for i in range(cuadrosPorLado) ] for j in range(cuadrosPorLado) ]
+    ubicacionesArboles = [[0] * cuadrosPorLado for i in range(cuadrosPorLado)]
 
     limpiarMapa()
 
@@ -325,12 +328,26 @@ def colocarArboles():
 
         # Coloca el árbol en la posición escogida
         mapa[coordenadaEscogida[0]][coordenadaEscogida[1]] = 5
+        ubicacionesArboles[coordenadaEscogida[0]][coordenadaEscogida[1]] = 5
 
         # Como ya colocó ese árbol entonces disminuye la cantidad de árboles a colocar
         cantidadArboles = cantidadArboles - 1
 
         # Elimina de las opciones a escoger las coordenadas del árbol colocado
         filaEscogida.remove(coordenadaEscogida)
+
+
+def reiniciarJuego():
+    global avatarX, avatarY, tesoroX, tesoroY, mapa, ubicacionesArboles
+    avatarX = 0
+    avatarY = 0
+    tesoroX = cuadrosPorLado - 1
+    tesoroY = cuadrosPorLado - 1
+    print(ubicacionesArboles)
+    
+    for x in range(cuadrosPorLado):
+        for y in range(cuadrosPorLado):
+            mapa[x][y] = ubicacionesArboles[x][y]
 
 
 # Método que encuentra la ruta
@@ -742,7 +759,7 @@ def mousePressed():
     if botonReinicio.mouseEnBoton():
         botonReinicio.clickeado()
         yaJugo = False
-        colocarArboles()
+        reiniciarJuego()
 
     deslizadorMoviendose = mouseSobreDeslizador
 
