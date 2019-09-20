@@ -343,7 +343,6 @@ def reiniciarJuego():
     avatarY = 0
     tesoroX = cuadrosPorLado - 1
     tesoroY = cuadrosPorLado - 1
-    print(ubicacionesArboles)
     
     for x in range(cuadrosPorLado):
         for y in range(cuadrosPorLado):
